@@ -4,6 +4,7 @@ import {
   Calculator,
   Coins,
   Menu,
+  Rocket,
   TrendingUp,
   Users,
   Wallet,
@@ -71,8 +72,8 @@ const QUICK_ACTIONS = [
     id: "withdrawal",
     label: "Withdraw",
     icon: Wallet,
-    color: "oklch(0.65 0.2 145)",
-    bg: "oklch(0.65 0.2 145 / 0.12)",
+    color: "oklch(0.68 0.18 145)",
+    bg: "oklch(0.68 0.18 145 / 0.12)",
   },
   {
     id: "referral",
@@ -95,8 +96,8 @@ function AnnouncementTicker({ text }: { text: string }) {
     <div
       style={{
         background:
-          "linear-gradient(90deg, oklch(0.78 0.18 82 / 0.15), oklch(0.72 0.20 75 / 0.15))",
-        borderBottom: "1px solid oklch(0.78 0.18 82 / 0.3)",
+          "linear-gradient(90deg, oklch(0.78 0.18 82 / 0.12), oklch(0.72 0.20 75 / 0.12))",
+        borderBottom: "1px solid oklch(0.78 0.18 82 / 0.25)",
         padding: "8px 0",
         overflow: "hidden",
         position: "relative",
@@ -148,31 +149,44 @@ function BroadcastCard({
   return (
     <div
       style={{
-        background: "oklch(0.14 0.03 265)",
-        border: "1px solid oklch(0.78 0.18 82 / 0.3)",
-        borderRadius: 12,
+        background: "oklch(0.12 0.026 265)",
+        border: "1px solid oklch(0.78 0.18 82 / 0.28)",
+        borderRadius: 14,
         padding: "12px 14px",
         display: "flex",
         gap: 10,
         alignItems: "flex-start",
         marginBottom: 8,
+        boxShadow: "0 4px 16px oklch(0.78 0.18 82 / 0.08)",
       }}
     >
-      <Bell
+      <div
         style={{
-          width: 16,
-          height: 16,
-          color: "oklch(0.78 0.18 82)",
-          marginTop: 2,
+          width: 32,
+          height: 32,
+          borderRadius: 10,
+          background: "oklch(0.78 0.18 82 / 0.12)",
+          border: "1px solid oklch(0.78 0.18 82 / 0.2)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           flexShrink: 0,
         }}
-      />
+      >
+        <Bell
+          style={{
+            width: 14,
+            height: 14,
+            color: "oklch(0.78 0.18 82)",
+          }}
+        />
+      </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <p
           style={{
             fontSize: "0.82rem",
             fontWeight: 700,
-            color: "oklch(0.88 0.12 82)",
+            color: "oklch(0.90 0.12 84)",
             marginBottom: 2,
           }}
         >
@@ -181,7 +195,7 @@ function BroadcastCard({
         <p
           style={{
             fontSize: "0.75rem",
-            color: "oklch(0.70 0.02 265)",
+            color: "oklch(0.65 0.02 265)",
             lineHeight: 1.4,
           }}
         >
@@ -195,9 +209,10 @@ function BroadcastCard({
           background: "transparent",
           border: "none",
           cursor: "pointer",
-          color: "oklch(0.45 0.02 265)",
-          padding: 2,
+          color: "oklch(0.42 0.02 265)",
+          padding: 4,
           flexShrink: 0,
+          borderRadius: 6,
         }}
         aria-label="Dismiss notification"
       >
@@ -267,8 +282,19 @@ export default function Home({
   const tierLabel = getVipTierLabel(tier);
 
   return (
-    <div className="page-wrapper bg-grid-pattern bg-radial-glow">
-      {/* ── Announcement Ticker (Feature 14) ── */}
+    <div
+      style={{
+        minHeight: "100vh",
+        paddingBottom: "5rem",
+        background: `
+          radial-gradient(ellipse 100% 60% at 50% -10%, oklch(0.78 0.18 82 / 0.08) 0%, transparent 60%),
+          radial-gradient(ellipse 60% 40% at 90% 80%, oklch(0.65 0.18 200 / 0.04) 0%, transparent 50%),
+          oklch(0.08 0.018 265)
+        `,
+        backgroundAttachment: "fixed",
+      }}
+    >
+      {/* ── Announcement Ticker ── */}
       {announcement && <AnnouncementTicker text={announcement} />}
 
       {/* ── Header ── */}
@@ -280,19 +306,19 @@ export default function Home({
               alt="FSC"
               className="w-9 h-9 object-contain"
               style={{
-                filter: "drop-shadow(0 0 10px oklch(0.78 0.18 82 / 0.55))",
+                filter: "drop-shadow(0 0 12px oklch(0.78 0.18 82 / 0.6))",
               }}
             />
             <div className="leading-none">
               <div
                 className="font-display font-bold text-gold-gradient"
-                style={{ fontSize: "1.1rem" }}
+                style={{ fontSize: "1.15rem" }}
               >
                 FSC
               </div>
               <div
                 className="text-muted-foreground uppercase"
-                style={{ fontSize: "0.56rem", letterSpacing: "0.16em" }}
+                style={{ fontSize: "0.54rem", letterSpacing: "0.18em" }}
               >
                 Foreign Smart Coins
               </div>
@@ -320,7 +346,7 @@ export default function Home({
       />
 
       <main className="px-4 pt-5 pb-4">
-        {/* ── Broadcasts (Feature 12) ── */}
+        {/* ── Broadcasts ── */}
         {broadcasts.length > 0 && (
           <div className="animate-fade-in-up stagger-1 mb-4">
             {broadcasts.map((b) => (
@@ -337,19 +363,19 @@ export default function Home({
         <div className="animate-fade-in-up stagger-1 mb-4">
           <p
             className="text-sm mb-0.5"
-            style={{ color: "oklch(0.55 0.03 265)" }}
+            style={{ color: "oklch(0.48 0.03 265)" }}
           >
             {getGreeting()} ✨
           </p>
           <div className="flex items-center gap-2.5">
             <h1
               className="font-display font-bold text-foreground"
-              style={{ fontSize: "1.55rem", lineHeight: 1.1 }}
+              style={{ fontSize: "1.6rem", lineHeight: 1.1 }}
             >
               {user?.name ? (
                 <>
                   <span className="text-foreground">
-                    {user.name.split(" ")[0]}'s{" "}
+                    {user.name.split(" ")[0]}&apos;s{" "}
                   </span>
                   <span className="text-gold-gradient">Portfolio</span>
                 </>
@@ -363,6 +389,7 @@ export default function Home({
                 background: `${tierColor}18`,
                 color: tierColor,
                 borderColor: `${tierColor}44`,
+                fontSize: "0.6rem",
               }}
             >
               {tierLabel}
@@ -371,49 +398,65 @@ export default function Home({
         </div>
 
         {/* ── Balance Hero Card ── */}
-        <div className="balance-hero animate-fade-in-up stagger-2 mb-5 p-5">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1.5">
+        <div className="balance-hero animate-fade-in-up stagger-2 mb-5 p-6">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
               <Coins
-                style={{ width: 14, height: 14, color: "oklch(0.78 0.18 82)" }}
+                style={{ width: 15, height: 15, color: "oklch(0.78 0.18 82)" }}
               />
               <span
-                className="text-xs uppercase tracking-widest"
-                style={{ color: "oklch(0.55 0.03 265)" }}
+                className="text-xs uppercase tracking-widest font-semibold"
+                style={{
+                  color: "oklch(0.55 0.03 265)",
+                  letterSpacing: "0.14em",
+                }}
               >
-                Total Balance
+                Total Portfolio Value
               </span>
             </div>
-            <span
-              className="badge-pill badge-pill-emerald"
-              style={{ fontSize: "0.6rem" }}
-            >
-              ● LIVE
-            </span>
+            <div className="flex items-center gap-1.5">
+              {/* Live pulse dot */}
+              <span
+                className="animate-live-pulse"
+                style={{
+                  display: "inline-block",
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: "oklch(0.68 0.18 145)",
+                }}
+              />
+              <span
+                className="badge-pill badge-pill-emerald"
+                style={{ fontSize: "0.58rem", padding: "2px 8px" }}
+              >
+                LIVE
+              </span>
+            </div>
           </div>
 
           <div className="balance-hero-amount mb-1">
             {formatInr(animatedBalance)}
           </div>
-          <p className="text-xs mb-4" style={{ color: "oklch(0.45 0.02 265)" }}>
+          <p className="text-xs mb-4" style={{ color: "oklch(0.42 0.02 265)" }}>
             Available for withdrawal
           </p>
 
+          {/* Gold divider */}
+          <div className="gold-divider mb-4" />
+
           {totalInvested > 0 && (
-            <div
-              className="grid grid-cols-3 gap-2 pt-3"
-              style={{ borderTop: "1px solid oklch(0.78 0.18 82 / 0.1)" }}
-            >
+            <div className="grid grid-cols-3 gap-2">
               {[
                 {
                   label: "Invested",
                   value: formatInr(totalInvested),
-                  color: "oklch(0.75 0.01 80)",
+                  color: "oklch(0.78 0.08 265)",
                 },
                 {
                   label: "Cur. Value",
                   value: formatInr(currentValue),
-                  color: "oklch(0.75 0.01 80)",
+                  color: "oklch(0.78 0.08 265)",
                 },
                 {
                   label: "P&L",
@@ -423,16 +466,28 @@ export default function Home({
                     : "oklch(0.68 0.22 22)",
                 },
               ].map((stat) => (
-                <div key={stat.label} className="text-center">
+                <div
+                  key={stat.label}
+                  style={{
+                    background: "oklch(0.10 0.018 265 / 0.6)",
+                    borderRadius: 10,
+                    padding: "8px 6px",
+                    border: "1px solid oklch(0.22 0.034 265)",
+                    textAlign: "center",
+                  }}
+                >
                   <p
-                    className="text-xs mb-0.5"
-                    style={{ color: "oklch(0.45 0.02 265)" }}
+                    className="text-xs mb-1"
+                    style={{
+                      color: "oklch(0.42 0.02 265)",
+                      fontSize: "0.62rem",
+                    }}
                   >
                     {stat.label}
                   </p>
                   <p
                     className="font-bold"
-                    style={{ fontSize: "0.78rem", color: stat.color }}
+                    style={{ fontSize: "0.8rem", color: stat.color }}
                   >
                     {stat.value}
                   </p>
@@ -445,11 +500,11 @@ export default function Home({
             <button
               type="button"
               onClick={() => onNavigate("add-funds")}
-              className="w-full text-xs font-semibold py-1.5 rounded-lg transition-colors"
+              className="w-full text-xs font-semibold py-2 rounded-xl transition-all"
               style={{
-                color: "oklch(0.78 0.18 82)",
-                background: "oklch(0.78 0.18 82 / 0.08)",
-                border: "1px solid oklch(0.78 0.18 82 / 0.2)",
+                color: "oklch(0.82 0.16 84)",
+                background: "oklch(0.78 0.18 82 / 0.1)",
+                border: "1px solid oklch(0.78 0.18 82 / 0.22)",
               }}
             >
               Add funds to start investing →
@@ -473,16 +528,16 @@ export default function Home({
                   className="quick-action-icon"
                   style={{
                     background: action.bg,
-                    border: `1px solid ${action.color}33`,
+                    border: `1px solid ${action.color}2a`,
                   }}
                 >
                   <action.icon
-                    style={{ width: 20, height: 20, color: action.color }}
+                    style={{ width: 22, height: 22, color: action.color }}
                   />
                 </div>
                 <span
                   className="font-semibold leading-tight"
-                  style={{ fontSize: "0.64rem", color: "oklch(0.82 0.01 80)" }}
+                  style={{ fontSize: "0.67rem", color: "oklch(0.84 0.01 80)" }}
                 >
                   {action.label}
                 </span>
@@ -507,17 +562,19 @@ export default function Home({
         <div className="animate-fade-in-up stagger-5 mb-6">
           <button
             type="button"
-            className="btn-gold w-full rounded-2xl py-4 font-display font-bold text-lg"
+            className="btn-gold w-full rounded-2xl py-5 font-display font-bold flex items-center justify-center gap-3"
+            style={{ fontSize: "1.15rem" }}
             onClick={() => onNavigate("stocks")}
             data-ocid="home.primary_button"
           >
-            🚀 Start Your Investment Journey
+            <Rocket style={{ width: 22, height: 22 }} />
+            Start Your Investment Journey
           </button>
         </div>
 
         {/* ── Footer ── */}
         <div className="text-center pt-2 pb-1">
-          <p style={{ fontSize: "0.63rem", color: "oklch(0.38 0.02 265)" }}>
+          <p style={{ fontSize: "0.62rem", color: "oklch(0.35 0.02 265)" }}>
             © {new Date().getFullYear()}. Built with love using{" "}
             <a
               href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}

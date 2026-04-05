@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { ArrowRight, Smartphone, User } from "lucide-react";
+import { ArrowRight, Mail, Smartphone, User } from "lucide-react";
 import { useState } from "react";
 import { backendRegisterUser } from "../lib/backendStore";
 import {
@@ -91,8 +91,11 @@ export default function LoginScreen({
       style={{
         position: "fixed",
         inset: 0,
-        background:
-          "radial-gradient(ellipse at 50% 30%, oklch(0.16 0.03 265) 0%, oklch(0.09 0.02 265) 100%)",
+        background: `
+          radial-gradient(ellipse 80% 50% at 20% -5%, oklch(0.78 0.18 82 / 0.07) 0%, transparent 55%),
+          radial-gradient(ellipse 60% 40% at 80% 100%, oklch(0.65 0.18 200 / 0.04) 0%, transparent 55%),
+          radial-gradient(ellipse at 50% 30%, oklch(0.14 0.028 265) 0%, oklch(0.08 0.018 265) 100%)
+        `,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -102,30 +105,53 @@ export default function LoginScreen({
       }}
     >
       {/* Logo */}
-      <div style={{ textAlign: "center", marginBottom: 40 }}>
-        <img
-          src="/assets/generated/fsc-logo-premium-transparent.dim_300x300.png"
-          alt="FSC"
+      <div style={{ textAlign: "center", marginBottom: 36 }}>
+        <div
           style={{
-            width: 90,
-            height: 90,
-            objectFit: "contain",
-            margin: "0 auto 16px",
-            display: "block",
-            filter: "drop-shadow(0 0 20px oklch(0.78 0.18 82 / 0.6))",
+            position: "relative",
+            display: "inline-block",
+            marginBottom: 16,
           }}
-        />
+        >
+          {/* Golden ring behind logo */}
+          <div
+            className="glow-pulse"
+            style={{
+              position: "absolute",
+              inset: -12,
+              borderRadius: "50%",
+              background:
+                "radial-gradient(circle, oklch(0.78 0.18 82 / 0.2) 0%, transparent 65%)",
+              border: "1px solid oklch(0.78 0.18 82 / 0.3)",
+            }}
+          />
+          <img
+            src="/assets/generated/fsc-logo-premium-transparent.dim_300x300.png"
+            alt="FSC"
+            style={{
+              width: 96,
+              height: 96,
+              objectFit: "contain",
+              display: "block",
+              filter:
+                "drop-shadow(0 0 24px oklch(0.78 0.18 82 / 0.7)) drop-shadow(0 0 48px oklch(0.78 0.18 82 / 0.35))",
+              position: "relative",
+              zIndex: 1,
+            }}
+          />
+        </div>
         <h1
           className="font-display"
           style={{
-            fontSize: "2.5rem",
+            fontSize: "3rem",
             fontWeight: 800,
             background:
-              "linear-gradient(135deg, oklch(0.90 0.18 82), oklch(0.72 0.20 75))",
+              "linear-gradient(135deg, oklch(0.96 0.16 95), oklch(0.84 0.22 84), oklch(0.74 0.20 76))",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
             marginBottom: 4,
+            lineHeight: 1,
           }}
         >
           FSC
@@ -133,157 +159,236 @@ export default function LoginScreen({
         <p
           className="font-sans"
           style={{
-            fontSize: "0.8rem",
-            letterSpacing: "0.2em",
+            fontSize: "0.75rem",
+            letterSpacing: "0.22em",
             textTransform: "uppercase",
-            color: "oklch(0.60 0.08 82)",
+            color: "oklch(0.62 0.09 84)",
           }}
         >
           Foreign Smart Coins
         </p>
       </div>
 
-      {/* Card */}
+      {/* Card with gradient border */}
       <div
         style={{
+          padding: 1,
+          borderRadius: 22,
+          background:
+            "linear-gradient(135deg, oklch(0.78 0.18 82 / 0.5), oklch(0.55 0.18 200 / 0.25), oklch(0.78 0.18 82 / 0.5))",
+          boxShadow:
+            "0 0 60px oklch(0.78 0.18 82 / 0.12), 0 24px 80px oklch(0 0 0 / 0.6)",
           width: "100%",
           maxWidth: 380,
-          background: "oklch(0.13 0.025 265)",
-          border: "1px solid oklch(0.78 0.18 82 / 0.25)",
-          borderRadius: 20,
-          padding: "32px 28px",
-          boxShadow:
-            "0 20px 60px oklch(0 0 0 / 0.5), 0 0 40px oklch(0.78 0.18 82 / 0.08)",
         }}
       >
-        <h2
-          className="font-display"
+        <div
           style={{
-            fontSize: "1.5rem",
-            fontWeight: 700,
-            color: "oklch(0.95 0.01 80)",
-            marginBottom: 6,
+            background: "oklch(0.12 0.024 265)",
+            borderRadius: 21,
+            padding: "32px 28px",
           }}
         >
-          {step === 1 ? "Welcome Back" : "Verify Identity"}
-        </h2>
-        <p
-          className="font-sans"
-          style={{
-            fontSize: "0.875rem",
-            color: "oklch(0.55 0.02 265)",
-            marginBottom: 28,
-          }}
-        >
-          {step === 1
-            ? "Enter your name to get started"
-            : "Enter your 10-digit Indian mobile number"}
-        </p>
+          <h2
+            className="font-display"
+            style={{
+              fontSize: "1.6rem",
+              fontWeight: 700,
+              color: "oklch(0.96 0.005 80)",
+              marginBottom: 6,
+            }}
+          >
+            {step === 1 ? "Welcome Back" : "Verify Identity"}
+          </h2>
+          <p
+            className="font-sans"
+            style={{
+              fontSize: "0.875rem",
+              color: "oklch(0.50 0.02 265)",
+              marginBottom: 28,
+              lineHeight: 1.5,
+            }}
+          >
+            {step === 1
+              ? "Enter your name to get started"
+              : "Enter your 10-digit Indian mobile number"}
+          </p>
 
-        {step === 1 ? (
-          <div>
-            <div style={{ position: "relative", marginBottom: 8 }}>
-              <User
-                style={{
-                  position: "absolute",
-                  left: 14,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  width: 18,
-                  height: 18,
-                  color: "oklch(0.78 0.18 82)",
-                }}
-              />
-              <Input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleNameNext()}
-                placeholder="Your full name"
-                style={{ paddingLeft: 44 }}
-                className="bg-secondary border-border text-foreground placeholder:text-muted-foreground rounded-xl"
-                data-ocid="login.name.input"
-              />
-            </div>
-            {nameError && (
-              <p
-                style={{
-                  fontSize: "0.8rem",
-                  color: "oklch(0.65 0.22 22)",
-                  marginBottom: 8,
-                }}
-                data-ocid="login.name_error"
+          {step === 1 ? (
+            <div>
+              <div style={{ position: "relative", marginBottom: 8 }}>
+                <User
+                  style={{
+                    position: "absolute",
+                    left: 14,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    width: 18,
+                    height: 18,
+                    color: "oklch(0.78 0.18 82)",
+                    zIndex: 1,
+                  }}
+                />
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleNameNext()}
+                  placeholder="Your full name"
+                  style={{
+                    paddingLeft: 44,
+                    background: "oklch(0.16 0.028 265)",
+                    borderColor: "oklch(0.28 0.042 265)",
+                    color: "oklch(0.96 0.005 80)",
+                    borderRadius: 14,
+                    height: 48,
+                    fontSize: "0.95rem",
+                  }}
+                  className="placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
+                  data-ocid="login.name.input"
+                />
+              </div>
+              {nameError && (
+                <p
+                  style={{
+                    fontSize: "0.8rem",
+                    color: "oklch(0.65 0.22 22)",
+                    marginBottom: 8,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                  }}
+                  data-ocid="login.name_error"
+                >
+                  {nameError}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={handleNameNext}
+                className="btn-gold w-full mt-4 rounded-2xl py-4 font-bold uppercase tracking-widest flex items-center justify-center gap-2"
+                style={{ fontSize: "0.9rem" }}
+                data-ocid="login.name.submit_button"
               >
-                {nameError}
-              </p>
-            )}
-            <button
-              type="button"
-              onClick={handleNameNext}
-              className="btn-gold w-full mt-4 rounded-xl py-3.5 font-bold uppercase tracking-widest flex items-center justify-center gap-2"
-              data-ocid="login.name.submit_button"
-            >
-              Next <ArrowRight style={{ width: 18, height: 18 }} />
-            </button>
-          </div>
-        ) : (
-          <div>
-            <div style={{ position: "relative", marginBottom: 8 }}>
-              <Smartphone
-                style={{
-                  position: "absolute",
-                  left: 14,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  width: 18,
-                  height: 18,
-                  color: "oklch(0.78 0.18 82)",
-                }}
-              />
-              <Input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                placeholder="10-digit mobile number"
-                maxLength={10}
-                inputMode="numeric"
-                style={{ paddingLeft: 44 }}
-                className="bg-secondary border-border text-foreground placeholder:text-muted-foreground rounded-xl"
-                data-ocid="login.phone.input"
-              />
+                Continue <ArrowRight style={{ width: 18, height: 18 }} />
+              </button>
             </div>
-            {phoneError && (
-              <p
-                style={{
-                  fontSize: "0.8rem",
-                  color: "oklch(0.65 0.22 22)",
-                  marginBottom: 8,
-                  lineHeight: 1.4,
-                }}
-                data-ocid="login.phone_error"
+          ) : (
+            <div>
+              <div style={{ position: "relative", marginBottom: 8 }}>
+                <Smartphone
+                  style={{
+                    position: "absolute",
+                    left: 14,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    width: 18,
+                    height: 18,
+                    color: "oklch(0.78 0.18 82)",
+                    zIndex: 1,
+                  }}
+                />
+                <Input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                  placeholder="10-digit mobile number"
+                  maxLength={10}
+                  inputMode="numeric"
+                  style={{
+                    paddingLeft: 44,
+                    background: "oklch(0.16 0.028 265)",
+                    borderColor: "oklch(0.28 0.042 265)",
+                    color: "oklch(0.96 0.005 80)",
+                    borderRadius: 14,
+                    height: 48,
+                    fontSize: "0.95rem",
+                  }}
+                  className="placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
+                  data-ocid="login.phone.input"
+                />
+              </div>
+              {phoneError && (
+                <p
+                  style={{
+                    fontSize: "0.8rem",
+                    color: "oklch(0.65 0.22 22)",
+                    marginBottom: 8,
+                    lineHeight: 1.4,
+                  }}
+                  data-ocid="login.phone_error"
+                >
+                  {phoneError}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={handleLogin}
+                className="btn-gold w-full mt-4 rounded-2xl py-4 font-bold uppercase tracking-widest flex items-center justify-center gap-2"
+                style={{ fontSize: "0.9rem" }}
+                data-ocid="login.submit_button"
               >
-                {phoneError}
-              </p>
-            )}
-            <button
-              type="button"
-              onClick={handleLogin}
-              className="btn-gold w-full mt-4 rounded-xl py-3.5 font-bold uppercase tracking-widest flex items-center justify-center gap-2"
-              data-ocid="login.submit_button"
+                Login <ArrowRight style={{ width: 18, height: 18 }} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="w-full mt-2 py-2.5 text-sm font-medium transition-colors"
+                style={{ color: "oklch(0.50 0.02 265)" }}
+              >
+                ← Back
+              </button>
+            </div>
+          )}
+
+          {/* Trust indicator */}
+          <div
+            style={{
+              marginTop: 20,
+              paddingTop: 16,
+              borderTop: "1px solid oklch(0.22 0.034 265)",
+              textAlign: "center",
+            }}
+          >
+            <p
+              style={{
+                fontSize: "0.68rem",
+                color: "oklch(0.42 0.02 265)",
+                letterSpacing: "0.02em",
+              }}
             >
-              Login <ArrowRight style={{ width: 18, height: 18 }} />
-            </button>
-            <button
-              type="button"
-              onClick={() => setStep(1)}
-              className="w-full mt-2 py-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              ← Back
-            </button>
+              🔐 256-bit encrypted • Secure transactions
+            </p>
           </div>
-        )}
+        </div>
       </div>
 
-      <p className="text-muted-foreground mt-8" style={{ fontSize: "0.7rem" }}>
+      {/* Customer Care Button */}
+      <a
+        href="https://mail.google.com/mail/?view=cm&to=99999diamonds@gmail.com&su=FSC%20Support%20Request&body=Hello%20FSC%20Support%2C%0A%0A"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          marginTop: 20,
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "8px 18px",
+          borderRadius: 999,
+          background: "oklch(0.78 0.18 82 / 0.1)",
+          border: "1px solid oklch(0.78 0.18 82 / 0.25)",
+          color: "oklch(0.82 0.12 84)",
+          fontSize: "0.75rem",
+          fontWeight: 600,
+          letterSpacing: "0.02em",
+          textDecoration: "none",
+          transition: "all 0.2s ease",
+        }}
+      >
+        <Mail style={{ width: 13, height: 13 }} />
+        Customer Care
+      </a>
+
+      <p className="text-muted-foreground mt-4" style={{ fontSize: "0.65rem" }}>
         © {new Date().getFullYear()} FSC Foreign Smart Coins. All rights
         reserved.
       </p>
@@ -293,9 +398,9 @@ export default function LoginScreen({
         type="button"
         onClick={() => onAdminAccess?.()}
         style={{
-          marginTop: 16,
-          fontSize: "0.65rem",
-          color: "oklch(0.35 0.02 265)",
+          marginTop: 10,
+          fontSize: "0.6rem",
+          color: "oklch(0.28 0.02 265)",
           background: "transparent",
           border: "none",
           cursor: "pointer",

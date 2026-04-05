@@ -209,8 +209,9 @@ export default function AppMenu({
         side="left"
         className="w-[300px] p-0 overflow-y-auto"
         style={{
-          background: "oklch(0.11 0.022 265)",
+          background: "oklch(0.09 0.018 265)",
           borderRight: "1px solid oklch(0.78 0.18 82 / 0.15)",
+          boxShadow: "4px 0 40px oklch(0 0 0 / 0.6)",
         }}
       >
         {/* Profile Header */}
@@ -218,50 +219,93 @@ export default function AppMenu({
           className="p-5 pb-4"
           style={{
             background:
-              "linear-gradient(160deg, oklch(0.16 0.04 265), oklch(0.11 0.022 265))",
-            borderBottom: "1px solid oklch(0.78 0.18 82 / 0.12)",
+              "linear-gradient(160deg, oklch(0.15 0.038 265) 0%, oklch(0.10 0.020 265) 100%)",
+            borderBottom: "1px solid oklch(0.78 0.18 82 / 0.14)",
+            position: "relative",
+            overflow: "hidden",
           }}
         >
+          {/* Top gold accent line */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 2,
+              background:
+                "linear-gradient(90deg, transparent, oklch(0.78 0.18 82 / 0.8) 30%, oklch(0.95 0.14 92) 50%, oklch(0.78 0.18 82 / 0.8) 70%, transparent)",
+            }}
+          />
+
           <div className="flex items-start gap-3 mb-4">
             <div className="relative">
-              <Avatar
-                className="w-14 h-14 cursor-pointer"
-                onClick={() => fileInputRef.current?.click()}
-                style={{ outline: `2px solid ${tierColor}`, outlineOffset: 2 }}
+              {/* Gradient border for avatar */}
+              <div
+                style={{
+                  padding: 2,
+                  borderRadius: "50%",
+                  background: `conic-gradient(${tierColor} 0deg, oklch(0.88 0.14 88) 120deg, ${tierColor} 240deg, oklch(0.60 0.10 200) 360deg)`,
+                }}
               >
-                <AvatarImage src={user?.profilePic} />
-                <AvatarFallback
-                  className="font-display font-bold text-lg"
-                  style={{
-                    background: "oklch(0.18 0.03 265)",
-                    color: tierColor,
-                  }}
+                <Avatar
+                  className="w-14 h-14 cursor-pointer block"
+                  onClick={() => fileInputRef.current?.click()}
                 >
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
+                  <AvatarImage src={user?.profilePic} />
+                  <AvatarFallback
+                    className="font-display font-bold text-lg"
+                    style={{
+                      background: "oklch(0.14 0.028 265)",
+                      color: tierColor,
+                    }}
+                  >
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
               <span
                 className="absolute -bottom-1 -right-1 text-xs px-1.5 py-0.5 rounded-full font-bold"
                 style={{
                   background: tierColor,
                   color: "oklch(0.1 0.02 265)",
-                  fontSize: "0.6rem",
+                  fontSize: "0.58rem",
+                  boxShadow: `0 0 8px ${tierColor}80`,
                 }}
               >
                 {tierLabel}
               </span>
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 pt-1">
               <p className="font-display font-bold text-foreground truncate text-base">
                 {user?.name ?? "\u2014"}
               </p>
               <p className="text-muted-foreground text-xs truncate">
                 {user?.phone ?? ""}
               </p>
+              {/* Balance in menu */}
+              {user && (
+                <p
+                  className="text-xs font-bold mt-1"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, oklch(0.88 0.18 84), oklch(0.72 0.20 76))",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                  }}
+                >
+                  ₹
+                  {user.balance.toLocaleString("en-IN", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
+              )}
               {kycData?.status === "verified" && (
                 <span
-                  className="inline-flex items-center gap-1 text-xs mt-1"
-                  style={{ color: "oklch(0.65 0.2 145)" }}
+                  className="inline-flex items-center gap-1 text-xs mt-0.5"
+                  style={{ color: "oklch(0.68 0.18 145)" }}
                 >
                   <CheckCircle2 style={{ width: 10, height: 10 }} /> KYC
                   Verified
@@ -274,10 +318,12 @@ export default function AppMenu({
           <button
             type="button"
             onClick={handleCopyId}
-            className="w-full flex items-center justify-between rounded-xl px-3 py-2 mb-3"
+            className="w-full flex items-center justify-between rounded-xl px-3 py-2.5 mb-3 transition-all"
             style={{
-              background: "oklch(0.15 0.03 265)",
-              border: "1px solid oklch(0.25 0.04 265)",
+              background: "oklch(0.13 0.026 265)",
+              border: "1px solid oklch(0.78 0.18 82 / 0.15)",
+              borderTop: "1px solid oklch(0.78 0.18 82 / 0.35)",
+              boxShadow: "0 2px 10px oklch(0 0 0 / 0.3)",
             }}
             data-ocid="menu.copy.button"
           >
@@ -292,8 +338,9 @@ export default function AppMenu({
                 width: 14,
                 height: 14,
                 color: idCopied
-                  ? "oklch(0.65 0.2 145)"
+                  ? "oklch(0.68 0.18 145)"
                   : "oklch(0.55 0.02 265)",
+                transition: "color 0.2s ease",
               }}
             />
           </button>
@@ -307,8 +354,8 @@ export default function AppMenu({
                 style={{
                   color:
                     completionPct === 100
-                      ? "oklch(0.65 0.2 145)"
-                      : "oklch(0.78 0.18 82)",
+                      ? "oklch(0.68 0.18 145)"
+                      : "oklch(0.82 0.16 84)",
                 }}
               >
                 {completionPct}%
@@ -316,8 +363,10 @@ export default function AppMenu({
             </div>
             <Progress
               value={completionPct}
-              className="h-1.5"
-              style={{ background: "oklch(0.2 0.03 265)" }}
+              className="h-2.5"
+              style={{
+                background: "oklch(0.18 0.03 265)",
+              }}
             />
           </div>
         </div>
@@ -328,7 +377,7 @@ export default function AppMenu({
             <div key={group.label} className={gi > 0 ? "mt-3" : ""}>
               <p
                 className="text-xs font-bold uppercase tracking-widest px-2 mb-1.5"
-                style={{ color: "oklch(0.78 0.18 82 / 0.7)" }}
+                style={{ color: "oklch(0.78 0.18 82 / 0.65)" }}
               >
                 {group.label}
               </p>
@@ -337,30 +386,52 @@ export default function AppMenu({
                   key={item.page}
                   type="button"
                   onClick={() => handleItemClick(item.page)}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 mb-0.5"
-                  style={{ color: "oklch(0.85 0.01 80)" }}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all duration-150 mb-0.5 group"
+                  style={{ color: "oklch(0.82 0.01 80)" }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background =
-                      "oklch(0.17 0.03 265)";
-                    (e.currentTarget as HTMLButtonElement).style.color =
-                      "oklch(0.78 0.18 82)";
+                    const btn = e.currentTarget as HTMLButtonElement;
+                    btn.style.background = "oklch(0.15 0.028 265)";
+                    btn.style.color = "oklch(0.84 0.18 86)";
+                    const icon = btn.querySelector("svg") as SVGElement | null;
+                    if (icon) {
+                      const wrapper = icon.parentElement;
+                      if (wrapper)
+                        wrapper.style.background = "oklch(0.78 0.18 82 / 0.1)";
+                    }
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background =
-                      "transparent";
-                    (e.currentTarget as HTMLButtonElement).style.color =
-                      "oklch(0.85 0.01 80)";
+                    const btn = e.currentTarget as HTMLButtonElement;
+                    btn.style.background = "transparent";
+                    btn.style.color = "oklch(0.82 0.01 80)";
+                    const icon = btn.querySelector("svg") as SVGElement | null;
+                    if (icon) {
+                      const wrapper = icon.parentElement;
+                      if (wrapper) wrapper.style.background = "transparent";
+                    }
                   }}
                   data-ocid={`menu.${item.page}.link`}
                 >
-                  <item.icon style={{ width: 16, height: 16, flexShrink: 0 }} />
+                  <span
+                    style={{
+                      width: 30,
+                      height: 30,
+                      borderRadius: 8,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      transition: "background 0.15s ease",
+                    }}
+                  >
+                    <item.icon style={{ width: 15, height: 15 }} />
+                  </span>
                   <span className="font-medium">{item.label}</span>
                 </button>
               ))}
               {gi < MENU_GROUPS.length - 1 && (
                 <Separator
                   className="mt-3"
-                  style={{ background: "oklch(0.2 0.03 265)" }}
+                  style={{ background: "oklch(0.18 0.028 265)" }}
                 />
               )}
             </div>
@@ -370,70 +441,105 @@ export default function AppMenu({
         {/* Bottom: Theme + Admin Panel + Logout */}
         <div
           className="px-4 py-4 mt-2"
-          style={{ borderTop: "1px solid oklch(0.2 0.03 265)" }}
+          style={{ borderTop: "1px solid oklch(0.18 0.028 265)" }}
         >
           <button
             type="button"
             onClick={handleToggleTheme}
-            className="w-full flex items-center justify-between rounded-xl px-3 py-2.5 mb-2 transition-all"
+            className="w-full flex items-center justify-between rounded-xl px-3 py-3 mb-2 transition-all"
             style={{
-              background: "oklch(0.15 0.03 265)",
-              border: "1px solid oklch(0.25 0.04 265)",
+              background: "oklch(0.13 0.024 265)",
+              border: "1px solid oklch(0.22 0.036 265)",
             }}
             data-ocid="menu.theme.toggle"
           >
-            <span className="text-sm font-medium text-foreground flex items-center gap-2">
+            <span className="text-sm font-medium text-foreground flex items-center gap-2.5">
               {isDark ? (
-                <Moon style={{ width: 16, height: 16 }} />
+                <Moon
+                  style={{
+                    width: 16,
+                    height: 16,
+                    color: "oklch(0.68 0.18 265)",
+                  }}
+                />
               ) : (
-                <Sun style={{ width: 16, height: 16 }} />
+                <Sun
+                  style={{
+                    width: 16,
+                    height: 16,
+                    color: "oklch(0.78 0.18 82)",
+                  }}
+                />
               )}
               {isDark ? "Dark Mode" : "Light Mode"}
             </span>
             <div
-              className="w-9 h-5 rounded-full relative transition-all"
+              className="w-10 h-5 rounded-full relative transition-all"
               style={{
                 background: isDark
-                  ? "oklch(0.78 0.18 82 / 0.3)"
+                  ? "linear-gradient(90deg, oklch(0.78 0.18 82 / 0.4), oklch(0.78 0.18 82 / 0.25))"
                   : "oklch(0.55 0.18 75 / 0.3)",
+                border: isDark
+                  ? "1px solid oklch(0.78 0.18 82 / 0.35)"
+                  : "1px solid oklch(0.55 0.18 75 / 0.3)",
               }}
             >
               <div
                 className="absolute top-0.5 w-4 h-4 rounded-full transition-all"
                 style={{
                   background: isDark
-                    ? "oklch(0.78 0.18 82)"
+                    ? "linear-gradient(135deg, oklch(0.90 0.18 88), oklch(0.74 0.20 78))"
                     : "oklch(0.55 0.18 75)",
                   left: isDark ? "calc(100% - 18px)" : "2px",
+                  boxShadow: isDark
+                    ? "0 0 6px oklch(0.78 0.18 82 / 0.6)"
+                    : "none",
                 }}
               />
             </div>
           </button>
 
-          {/* Admin Panel Button */}
+          {/* Admin Panel Button — gold shimmer */}
           <button
             type="button"
             onClick={() => handleItemClick("admin-panel")}
-            className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 mb-2 text-sm font-semibold transition-all"
+            className="w-full flex items-center gap-3 rounded-xl px-3 py-3 mb-2 text-sm font-semibold transition-all relative overflow-hidden"
             style={{
-              background: "oklch(0.14 0.04 265)",
-              border: "1px solid oklch(0.78 0.18 82 / 0.3)",
-              color: "oklch(0.78 0.18 82)",
+              background: "oklch(0.13 0.038 265)",
+              border: "1px solid oklch(0.78 0.18 82 / 0.35)",
+              color: "oklch(0.84 0.18 86)",
+              boxShadow: "0 0 20px oklch(0.78 0.18 82 / 0.08)",
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLButtonElement).style.background =
-                "oklch(0.78 0.18 82 / 0.12)";
+                "oklch(0.78 0.18 82 / 0.14)";
               (e.currentTarget as HTMLButtonElement).style.borderColor =
-                "oklch(0.78 0.18 82 / 0.6)";
+                "oklch(0.78 0.18 82 / 0.65)";
+              (e.currentTarget as HTMLButtonElement).style.boxShadow =
+                "0 0 28px oklch(0.78 0.18 82 / 0.2)";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLButtonElement).style.background =
-                "oklch(0.14 0.04 265)";
+                "oklch(0.13 0.038 265)";
               (e.currentTarget as HTMLButtonElement).style.borderColor =
-                "oklch(0.78 0.18 82 / 0.3)";
+                "oklch(0.78 0.18 82 / 0.35)";
+              (e.currentTarget as HTMLButtonElement).style.boxShadow =
+                "0 0 20px oklch(0.78 0.18 82 / 0.08)";
             }}
             data-ocid="menu.admin-panel.button"
           >
+            {/* Shimmer line at top */}
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 1,
+                background:
+                  "linear-gradient(90deg, transparent, oklch(0.88 0.16 88 / 0.7) 50%, transparent)",
+              }}
+            />
             <Settings2 style={{ width: 16, height: 16 }} />
             Admin Panel
           </button>
@@ -444,10 +550,22 @@ export default function AppMenu({
               onOpenChange(false);
               setTimeout(onLogout, 150);
             }}
-            className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all"
+            className="w-full flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition-all"
             style={{
               color: "oklch(0.65 0.22 22)",
-              border: "1px solid oklch(0.65 0.22 22 / 0.25)",
+              border: "1px solid oklch(0.65 0.22 22 / 0.22)",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background =
+                "oklch(0.65 0.22 22 / 0.08)";
+              (e.currentTarget as HTMLButtonElement).style.borderColor =
+                "oklch(0.65 0.22 22 / 0.45)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background =
+                "transparent";
+              (e.currentTarget as HTMLButtonElement).style.borderColor =
+                "oklch(0.65 0.22 22 / 0.22)";
             }}
             data-ocid="menu.logout.button"
           >

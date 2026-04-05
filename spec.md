@@ -1,58 +1,40 @@
 # FSC Foreign Smart Coins
 
 ## Current State
-
-The entire app (users, payments, withdrawals, KYC, tickets) stores all data in `localStorage` — a per-browser, per-device store. When a new user registers on their phone, their data is saved only to that phone's localStorage. When the admin opens the Admin Panel on a different browser/device, they see an empty panel because it reads from the admin device's own localStorage.
-
-The app does have a full Motoko backend canister with all required APIs (`getAllPayments`, `getAllWithdrawals`, `getAllTickets`, `updatePaymentStatus`, etc.) and a generated `backend.ts` client — but these are completely unused. The frontend uses only `localStorage` exclusively.
+Full-featured trading/investment app with deep navy + gold theme. Already has glassmorphism, gold gradients, animated counters, premium splash screen. The UI uses OKLCH color system, custom CSS classes (glass-card, balance-hero, quick-action, btn-gold, etc.), and Plus Jakarta Sans + Playfair Display fonts. All major pages exist: Login, Home, Stocks/Markets, AddFunds, PlanDetails, Portfolio, AdminPanel, and 15+ more pages. The app is functional and working.
 
 ## Requested Changes (Diff)
 
 ### Add
-- A shared central data store using the ICP canister backend for: user profiles, payment submissions, withdrawals, KYC, and support tickets.
-- A `backendStore` singleton in `src/frontend/src/lib/backendStore.ts` that wraps the backend canister client with caching and provides async CRUD for all shared data.
-- A `SharedDataContext` (React context + provider) that loads shared data from the backend on app start and keeps it in sync. Exposes: `users`, `payments`, `withdrawals`, `kycList`, `tickets`, and action functions for mutations.
-- On user registration (LoginScreen): after saving to localStorage, also register the user profile in the backend canister.
-- On payment submission (AddFunds): after saving to localStorage, also call `submitPayment` on the backend canister.
-- On withdrawal submission (Withdrawal): after saving to localStorage, also call `submitWithdrawalRequest` on the backend canister.
-- On KYC submission (KYC page): after saving to localStorage, also call `submitKyc` on the backend canister.
-- On support ticket submission (Support page): also call `submitSupportTicket` on the backend canister.
+- Richer ambient backgrounds with more layered radial/mesh gradients
+- More sophisticated card designs with subtle inner highlights, improved depth
+- Premium header redesign with better brand identity presentation
+- Enhanced bottom navigation with indicator bars/pills (not just a dot)
+- Elevated splash screen with cinematic feel
+- Better login screen with animated gradient border card and particle field
+- Home page with more premium card styling, richer balance card, and stronger visual hierarchy
+- Consistent premium page headers with back button and gradient title across all pages
+- Better typography scale contrast (section titles more bold/prominent)
+- Micro-interaction improvements on interactive elements
+- Stronger gold gradient accents throughout
+- More premium stock/plan cards on Markets page
 
 ### Modify
-- `AdminPanel.tsx`: Change `getAllUsers`, `getAllPaymentsAdmin`, `getAllWithdrawalsAdmin`, `getAllKycAdmin` to read from the shared backend data (via the SharedDataContext) instead of from localStorage.
-- `AdminPanel.tsx` approve/reject actions: after updating localStorage, also call the corresponding backend update functions (`updatePaymentStatus`, `updateWithdrawalStatus`, `updateKycStatus`).
-- `src/frontend/src/types/fsc.ts`: Add a `fsc_user_registry` localStorage key that stores the list of all user phones (used as a fallback registry for local queries). Also add a `registerUserGlobally` function that appends to this registry.
-- `LoginScreen.tsx`: On successful registration, call `registerUserGlobally` and attempt to save user profile to backend (non-blocking — if backend call fails, localStorage still works for that device).
+- index.css: Upgrade CSS classes for glass-card, balance-hero, quick-action, btn-gold, bottom-nav, card-premium. Add new utility classes for premium ambient backgrounds, improved shimmer effects, and page headers.
+- SplashScreen.tsx: More cinematic — larger logo with multi-ring glow, animated ring orbits, stronger fade/scale animation
+- LoginScreen.tsx: Animated gradient border on login card, subtle floating particles, premium feel
+- Home.tsx: Balance hero card upgraded — larger, richer, more depth. Quick actions reimagined as premium tiles. Better section headers with icon accents.
+- BottomNav.tsx: Active state uses a pill indicator bar above icon, larger icon, more luxurious active state
+- AppMenu.tsx: Profile header upgraded with mesh gradient background, better tier badge, improved menu item hover states
 
 ### Remove
-- Nothing is removed. All existing localStorage logic stays as-is for backward compatibility and local performance.
+- Nothing removed — pure visual upgrade only, all functionality preserved
 
 ## Implementation Plan
-
-1. **Create `src/frontend/src/lib/backendStore.ts`**: Async singleton that lazily initializes the backend actor and exposes typed methods: `registerUser(user)`, `submitPayment(payment)`, `getPayments()`, `getAllPaymentsAdmin()`, `submitWithdrawal(req)`, `getAllWithdrawalsAdmin()`, `submitKyc(data)`, `getAllKycAdmin()`, `submitTicket(ticket)`, `getAllTicketsAdmin()`, `updatePaymentStatus(...)`, `updateWithdrawalStatus(...)`, `updateKycStatus(...)`. All methods catch errors silently (localStorage remains source of truth for the user's own device).
-
-2. **Add `SharedDataContext` in `src/frontend/src/context/SharedDataContext.tsx`**: React context that on mount calls the backend admin APIs to load all users, payments, withdrawals, KYC, and tickets. Exposes this data and refresh functions. The admin panel subscribes to this context.
-
-3. **Modify `LoginScreen.tsx`**: After `saveUser(user)`, also call `backendStore.registerUser(user)` in a fire-and-forget manner. Also add the user's phone to `fsc_user_registry` in localStorage.
-
-4. **Modify `AddFunds.tsx`**: After `savePayments(...)`, also call `backendStore.submitPayment(payment)` in fire-and-forget.
-
-5. **Modify `Withdrawal.tsx`**: After `saveWithdrawals(...)`, also call `backendStore.submitWithdrawal(req)` in fire-and-forget.
-
-6. **Modify `KYC.tsx`**: After `saveKycData(...)`, also call `backendStore.submitKyc(data)` in fire-and-forget.
-
-7. **Modify `Support.tsx`**: After `saveSupportTickets(...)`, also call `backendStore.submitTicket(ticket)` in fire-and-forget.
-
-8. **Modify `AdminPanel.tsx`**: 
-   - Wrap the component in `SharedDataContext` provider (or consume from App-level provider).
-   - Replace `getAllUsers()` → read from `sharedData.users` (merged with localStorage users).
-   - Replace `getAllPaymentsAdmin()` → read from `sharedData.payments` (merged with localStorage payments, deduplicated by ID).
-   - Replace `getAllWithdrawalsAdmin()` → read from `sharedData.withdrawals`.
-   - Replace `getAllKycAdmin()` → read from `sharedData.kycList`.
-   - After admin approve/reject payment: also call `backendStore.updatePaymentStatus(...)`.
-   - After admin approve/reject withdrawal: also call `backendStore.updateWithdrawalStatus(...)`.
-   - After admin approve/reject KYC: also call `backendStore.updateKycStatus(...)`.
-
-9. **Add `fsc_user_registry` to `fsc.ts`**: Helper function `registerUserGlobally(phone: string)` that maintains a master list of all user phones in localStorage. Update `getAllUsers()` to also scan this registry. This ensures admin sees all users who registered on the same device, and the backend provides cross-device visibility.
-
-10. **Wrap App with SharedDataProvider**: In `App.tsx`, wrap the app (or at least the admin panel route) with `<SharedDataProvider>` so the context is available.
+1. Rewrite index.css with upgraded design tokens, new CSS classes, stronger ambient/glow effects
+2. Redesign SplashScreen.tsx with cinematic multi-ring glow and better animation
+3. Redesign LoginScreen.tsx with animated gradient border card
+4. Redesign Home.tsx with upgraded balance hero, quick actions, and section styles
+5. Redesign BottomNav.tsx with pill-style active indicator
+6. Redesign AppMenu.tsx with richer profile header
+7. Validate and deploy

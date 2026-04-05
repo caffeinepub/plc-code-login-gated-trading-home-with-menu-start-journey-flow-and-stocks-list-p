@@ -32,17 +32,40 @@ export default function BottomNav({
             onClick={() =>
               item.id === "menu" ? onMenuOpen() : onNavigate(item.id)
             }
-            className="flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all duration-200"
+            className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl transition-all duration-200 relative"
             style={{
-              color: isActive ? "oklch(0.78 0.18 82)" : "oklch(0.55 0.02 265)",
+              color: isActive ? "oklch(0.84 0.18 86)" : "oklch(0.48 0.02 265)",
               background: isActive
-                ? "oklch(0.78 0.18 82 / 0.08)"
+                ? "oklch(0.78 0.18 82 / 0.10)"
                 : "transparent",
+              minWidth: 56,
             }}
             data-ocid={`bottom_nav.${item.id}.tab`}
           >
+            {/* Top pill indicator for active */}
+            {isActive && (
+              <span
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: 28,
+                  height: 3,
+                  borderRadius: "0 0 3px 3px",
+                  background:
+                    "linear-gradient(90deg, oklch(0.78 0.18 82), oklch(0.92 0.18 92))",
+                  boxShadow:
+                    "0 0 10px oklch(0.78 0.18 82 / 0.8), 0 0 20px oklch(0.78 0.18 82 / 0.4)",
+                }}
+              />
+            )}
             <item.Icon
-              style={{ width: 22, height: 22 }}
+              style={{
+                width: isActive ? 24 : 22,
+                height: isActive ? 24 : 22,
+                transition: "all 0.2s ease",
+              }}
               strokeWidth={isActive ? 2.5 : 1.8}
             />
             <span
@@ -50,23 +73,11 @@ export default function BottomNav({
                 fontSize: "0.65rem",
                 fontWeight: isActive ? 700 : 500,
                 letterSpacing: "0.03em",
+                transition: "all 0.2s ease",
               }}
             >
               {item.label}
             </span>
-            {isActive && (
-              <span
-                style={{
-                  width: 4,
-                  height: 4,
-                  borderRadius: "50%",
-                  background: "oklch(0.78 0.18 82)",
-                  boxShadow: "0 0 6px oklch(0.78 0.18 82 / 0.8)",
-                  position: "absolute",
-                  bottom: 4,
-                }}
-              />
-            )}
           </button>
         );
       })}
