@@ -220,7 +220,7 @@ export default function AppMenu({
           boxShadow: "4px 0 40px oklch(0 0 0 / 0.6)",
         }}
       >
-        {/* Profile Header */}
+        {/* Profile Header — overflow:visible so tier badge is NOT clipped */}
         <div
           className="p-5 pb-4"
           style={{
@@ -228,7 +228,7 @@ export default function AppMenu({
               "linear-gradient(160deg, oklch(0.13 0.055 235) 0%, oklch(0.09 0.038 240) 100%)",
             borderBottom: "1px solid oklch(0.65 0.22 220 / 0.14)",
             position: "relative",
-            overflow: "hidden",
+            overflow: "visible",
           }}
         >
           {/* Top blue accent line */}
@@ -244,8 +244,16 @@ export default function AppMenu({
             }}
           />
 
-          <div className="flex items-start gap-3 mb-4">
-            <div className="relative" style={{ flexShrink: 0 }}>
+          {/* Extra paddingBottom so tier badge (bottom:-3) is never clipped */}
+          <div
+            className="flex items-start gap-3 mb-4"
+            style={{ paddingBottom: 10 }}
+          >
+            {/* paddingBottom: 10 gives the tier badge room below the avatar */}
+            <div
+              className="relative"
+              style={{ flexShrink: 0, paddingBottom: 10 }}
+            >
               {/* Blue gradient border for avatar — 3px padding for clarity */}
               <button
                 type="button"
@@ -300,11 +308,11 @@ export default function AppMenu({
                   )}
                 </div>
               </button>
-              {/* Tier badge — larger and more readable */}
+              {/* Tier badge — positioned with enough room to show fully */}
               <span
                 style={{
                   position: "absolute",
-                  bottom: -3,
+                  bottom: 0,
                   right: -6,
                   background: tierColor,
                   color: "oklch(0.06 0.02 240)",
@@ -326,7 +334,7 @@ export default function AppMenu({
               className="flex-1 pt-1"
               style={{ minWidth: 0, overflow: "hidden" }}
             >
-              {/* Name — solid visible text */}
+              {/* Name — solid visible text, full width (no fixed maxWidth) */}
               <p
                 style={{
                   fontSize: "1rem",
@@ -335,7 +343,7 @@ export default function AppMenu({
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
-                  maxWidth: "148px",
+                  maxWidth: "100%",
                   marginBottom: 2,
                 }}
               >
