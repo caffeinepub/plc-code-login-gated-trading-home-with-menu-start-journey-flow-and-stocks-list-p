@@ -29,6 +29,7 @@ import WithdrawalHistory from "./pages/WithdrawalHistory";
 import {
   getCurrentUser,
   getTheme,
+  isMaintenanceMode,
   isUserFrozen,
   logoutUser,
   recordLogin,
@@ -68,6 +69,7 @@ export default function App() {
   const [page, setPage] = useState<Page>("home");
   const [menuOpen, setMenuOpen] = useState(false);
   const [isFrozen, setIsFrozen] = useState(false);
+  const [isMaintenance, setIsMaintenance] = useState(false);
 
   useEffect(() => {
     const theme = getTheme();
@@ -83,7 +85,8 @@ export default function App() {
       if (user) {
         setIsFrozen(isUserFrozen(user.phone));
       }
-    }, 10000);
+      setIsMaintenance(isMaintenanceMode());
+    }, 5000);
     return () => clearInterval(interval);
   }, [phase]);
 
@@ -128,6 +131,10 @@ export default function App() {
   // Frozen screen — shown when user is frozen and not on admin panel
   const showFrozenScreen =
     phase === "app" && isFrozen && page !== "admin-panel";
+
+  // Maintenance screen — shown when maintenance mode is on and not admin panel
+  const showMaintenanceScreen =
+    phase === "app" && isMaintenance && page !== "admin-panel";
 
   return (
     <ThemeProvider
@@ -244,7 +251,83 @@ export default function App() {
           </button>
         </div>
       )}
-      {phase === "app" && !showFrozenScreen && (
+      {phase === "app" && showMaintenanceScreen && (
+        <div
+          style={{
+            minHeight: "100vh",
+            background: "oklch(0.08 0.02 265)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "24px",
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              width: 96,
+              height: 96,
+              borderRadius: "50%",
+              background: "oklch(0.20 0.06 265)",
+              border: "2px solid oklch(0.78 0.18 82)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 28,
+              boxShadow: "0 0 40px oklch(0.78 0.18 82 / 0.3)",
+            }}
+          >
+            <span style={{ fontSize: 44 }}>🔧</span>
+          </div>
+          <h1
+            style={{
+              fontSize: "1.8rem",
+              fontWeight: 800,
+              background:
+                "linear-gradient(135deg, oklch(0.78 0.18 82), oklch(0.65 0.20 75))",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              marginBottom: 14,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            Under Maintenance
+          </h1>
+          <p
+            style={{
+              fontSize: "0.95rem",
+              color: "oklch(0.55 0.04 265)",
+              lineHeight: 1.6,
+              maxWidth: 320,
+              marginBottom: 36,
+            }}
+          >
+            FSC Foreign Smart Coins is currently undergoing scheduled
+            maintenance. We will be back shortly. Thank you for your patience.
+          </p>
+          <div
+            style={{
+              width: 48,
+              height: 2,
+              background:
+                "linear-gradient(90deg, transparent, oklch(0.78 0.18 82), transparent)",
+              marginBottom: 36,
+            }}
+          />
+          <p
+            style={{
+              fontSize: "0.75rem",
+              color: "oklch(0.45 0.04 265)",
+              letterSpacing: "0.05em",
+            }}
+          >
+            FSC Foreign Smart Coins
+          </p>
+        </div>
+      )}
+      {phase === "app" && !showFrozenScreen && !showMaintenanceScreen && (
         <div className="relative">
           {page === "home" && (
             <Home

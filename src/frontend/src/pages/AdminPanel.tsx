@@ -41,6 +41,8 @@ import {
   getAllWithdrawalsAdmin,
   getVipTier,
   getVipTierLabel,
+  isMaintenanceMode,
+  setMaintenanceMode,
 } from "../types/fsc";
 
 interface AdminPanelProps {
@@ -222,6 +224,7 @@ function EmptyState({
 // ─── Dashboard Tab ────────────────────────────────────────────────────────────
 function DashboardTab({ refreshKey }: { refreshKey: number }) {
   const _ = refreshKey; // suppress unused warning
+  const [maintenance, setMaintenanceState] = useState(isMaintenanceMode());
   const users = getAllUsers();
   const payments = getAllPaymentsAdmin();
   const withdrawals = getAllWithdrawalsAdmin();
@@ -333,6 +336,67 @@ function DashboardTab({ refreshKey }: { refreshKey: number }) {
             )}
           </div>
         ))}
+      </div>
+
+      {/* Maintenance Mode Toggle */}
+      <div
+        style={{
+          background: maintenance
+            ? "oklch(0.20 0.06 25 / 0.6)"
+            : "oklch(0.14 0.03 265)",
+          border: maintenance
+            ? "1px solid oklch(0.55 0.18 25)"
+            : "1px solid oklch(0.78 0.18 82 / 0.4)",
+          borderRadius: 14,
+          padding: "16px 18px",
+          marginBottom: 20,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+        }}
+      >
+        <div>
+          <p
+            style={{
+              fontSize: "0.85rem",
+              fontWeight: 700,
+              color: maintenance ? "oklch(0.72 0.2 22)" : "oklch(0.78 0.18 82)",
+              marginBottom: 3,
+            }}
+          >
+            🔧 Maintenance Mode
+          </p>
+          <p style={{ fontSize: "0.72rem", color: "oklch(0.50 0.04 265)" }}>
+            {maintenance
+              ? "All users are blocked from accessing the app"
+              : "App is live and accessible to all users"}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            const next = !maintenance;
+            setMaintenanceMode(next);
+            setMaintenanceState(next);
+          }}
+          style={{
+            background: maintenance
+              ? "linear-gradient(135deg, oklch(0.72 0.2 22), oklch(0.65 0.18 35))"
+              : "linear-gradient(135deg, oklch(0.78 0.18 82), oklch(0.65 0.20 75))",
+            color: "oklch(0.10 0.02 265)",
+            border: "none",
+            borderRadius: 10,
+            padding: "10px 18px",
+            fontSize: "0.8rem",
+            fontWeight: 800,
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+            letterSpacing: "0.03em",
+          }}
+        >
+          {maintenance ? "Turn OFF" : "Turn ON"}
+        </button>
       </div>
 
       <p

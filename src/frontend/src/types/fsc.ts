@@ -1128,3 +1128,13 @@ export function checkAndRunPayoutSchedule(): number {
   }
   return 0;
 }
+
+// ─── Maintenance Mode ─────────────────────────────────────────────────────────
+
+export function isMaintenanceMode(): boolean {
+  return localStorage.getItem("fsc_maintenance_mode") === "true";
+}
+
+export function setMaintenanceMode(enabled: boolean): void {
+  localStorage.setItem("fsc_maintenance_mode", enabled ? "true" : "false");
+}
