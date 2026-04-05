@@ -95,7 +95,7 @@ export default function EarningCalculator({ onBack }: EarningCalculatorProps) {
               className="font-display font-bold"
               style={{ fontSize: "2rem", color: "oklch(0.32 0.02 265)" }}
             >
-              \u20B9 0.00
+              ₹ 0.00
             </p>
           )}
           {principal > 0 && (
@@ -114,7 +114,7 @@ export default function EarningCalculator({ onBack }: EarningCalculatorProps) {
             className="text-xs font-semibold uppercase tracking-wider mb-2 block"
             style={{ color: "oklch(0.55 0.02 265)" }}
           >
-            Enter Amount (\u20B9)
+            Enter Amount (₹)
           </Label>
           <Input
             type="number"

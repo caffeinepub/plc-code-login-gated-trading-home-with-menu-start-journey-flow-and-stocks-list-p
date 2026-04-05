@@ -50,11 +50,11 @@ export default function Achievements({ onBack }: AchievementsProps) {
       id: "big-investor",
       icon: "\uD83D\uDCB0",
       title: "Big Investor",
-      description: "Invest \u20B910,000 total",
+      description: "Invest ₹10,000 total",
       unlocked: totalInvested >= 10000,
       progress: { current: Math.min(totalInvested, 10000), total: 10000 },
       formatProgress: (c: number, t: number) =>
-        `\u20B9${c.toLocaleString("en-IN")} / \u20B9${t.toLocaleString("en-IN")}`,
+        `₹${c.toLocaleString("en-IN")} / ₹${t.toLocaleString("en-IN")}`,
     },
     {
       id: "spin-master",

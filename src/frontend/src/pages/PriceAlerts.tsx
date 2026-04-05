@@ -76,7 +76,7 @@ export default function PriceAlerts({ onBack }: PriceAlertsProps) {
     savePriceAlerts(user.uniqueId, updated);
     setSelectedPlan("");
     setTargetPrice("");
-    toast.success(`Alert set for ${plan.name} at \u20B9${targetPrice}`);
+    toast.success(`Alert set for ${plan.name} at ₹${targetPrice}`);
   }
 
   function handleDelete(id: string) {
@@ -147,7 +147,7 @@ export default function PriceAlerts({ onBack }: PriceAlertsProps) {
                 <SelectContent style={{ background: "oklch(0.16 0.03 265)" }}>
                   {STOCK_PLANS.map((p) => (
                     <SelectItem key={p.amount} value={p.amount.toString()}>
-                      {p.name} (\u20B9{p.amount.toLocaleString("en-IN")})
+                      {p.name} (₹{p.amount.toLocaleString("en-IN")})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -155,7 +155,7 @@ export default function PriceAlerts({ onBack }: PriceAlertsProps) {
             </div>
             <div>
               <Label className="text-sm text-muted-foreground mb-1.5 block">
-                Target Price (\u20B9)
+                Target Price (₹)
               </Label>
               <Input
                 type="number"
@@ -246,8 +246,7 @@ export default function PriceAlerts({ onBack }: PriceAlertsProps) {
                       </div>
                       <div className="flex gap-3 text-xs text-muted-foreground">
                         <span>
-                          Target: \u20B9
-                          {alert.targetPrice.toLocaleString("en-IN")}
+                          Target: ₹{alert.targetPrice.toLocaleString("en-IN")}
                         </span>
                         <span
                           className="flex items-center gap-0.5"
@@ -263,7 +262,7 @@ export default function PriceAlerts({ onBack }: PriceAlertsProps) {
                           ) : (
                             <TrendingDown style={{ width: 12, height: 12 }} />
                           )}
-                          Current: \u20B9{(alert.currentPrice ?? 0).toFixed(0)}
+                          Current: ₹{(alert.currentPrice ?? 0).toFixed(0)}
                         </span>
                       </div>
                     </div>

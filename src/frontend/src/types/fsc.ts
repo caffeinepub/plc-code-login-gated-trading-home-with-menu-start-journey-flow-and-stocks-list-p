@@ -198,7 +198,7 @@ export function saveWithdrawals(withdrawals: WithdrawalRequest[]): void {
 }
 
 export function formatInr(amount: number): string {
-  return `\u20b9${amount.toLocaleString("en-IN", {
+  return `₹${amount.toLocaleString("en-IN", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;

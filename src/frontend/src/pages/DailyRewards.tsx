@@ -108,7 +108,7 @@ export default function DailyRewards({ onBack }: DailyRewardsProps) {
       ctx.font = "bold 13px 'Plus Jakarta Sans', sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(`\u20b9${REWARDS[i]}`, 0, 0);
+      ctx.fillText(`₹${REWARDS[i]}`, 0, 0);
       ctx.restore();
     }
 

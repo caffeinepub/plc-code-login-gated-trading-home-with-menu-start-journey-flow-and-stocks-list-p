@@ -72,7 +72,7 @@ export default function Withdrawal({ onBack }: WithdrawalProps) {
       return;
     }
     if (amt < MIN_WITHDRAWAL) {
-      toast.error(`Minimum withdrawal is \u20b9${MIN_WITHDRAWAL}`);
+      toast.error(`Minimum withdrawal is ₹${MIN_WITHDRAWAL}`);
       return;
     }
     if (user && amt > user.balance) {
@@ -228,7 +228,7 @@ export default function Withdrawal({ onBack }: WithdrawalProps) {
                   className="font-display font-bold"
                   style={{ fontSize: "0.95rem", color: "oklch(0.90 0.18 82)" }}
                 >
-                  \u20b9{submittedAmount.toLocaleString("en-IN")}
+                  ₹{submittedAmount.toLocaleString("en-IN")}
                 </span>
               </div>
               <div
@@ -315,7 +315,7 @@ export default function Withdrawal({ onBack }: WithdrawalProps) {
               className="font-sans text-muted-foreground"
               style={{ fontSize: "0.7rem" }}
             >
-              Min. \u20b9{MIN_WITHDRAWAL} required
+              Min. ₹{MIN_WITHDRAWAL} required
             </p>
           </div>
         </div>
@@ -459,7 +459,7 @@ export default function Withdrawal({ onBack }: WithdrawalProps) {
                   backgroundClip: "text",
                 }}
               >
-                \u20b9{user?.balance?.toLocaleString("en-IN") ?? "0"}
+                ₹{user?.balance?.toLocaleString("en-IN") ?? "0"}
               </p>
             </div>
 
@@ -469,13 +469,13 @@ export default function Withdrawal({ onBack }: WithdrawalProps) {
                 className="font-sans text-sm font-semibold text-foreground"
                 style={{ display: "block", marginBottom: 8 }}
               >
-                Amount to Withdraw (\u20b9)
+                Amount to Withdraw (₹)
               </label>
               <Input
                 id="withdraw-amount-input"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
-                placeholder={`Minimum \u20b9${MIN_WITHDRAWAL}`}
+                placeholder={`Minimum ₹${MIN_WITHDRAWAL}`}
                 type="text"
                 inputMode="numeric"
                 className="bg-secondary border-border text-foreground placeholder:text-muted-foreground"
@@ -488,7 +488,7 @@ export default function Withdrawal({ onBack }: WithdrawalProps) {
                   marginTop: 6,
                 }}
               >
-                Minimum withdrawal: \u20b9{MIN_WITHDRAWAL}
+                Minimum withdrawal: ₹{MIN_WITHDRAWAL}
               </p>
             </div>
 
@@ -563,7 +563,7 @@ export default function Withdrawal({ onBack }: WithdrawalProps) {
                 className="font-display font-bold text-primary"
                 style={{ fontSize: "1.1rem" }}
               >
-                \u20b9{Number(amount).toLocaleString("en-IN")}
+                ₹{Number(amount).toLocaleString("en-IN")}
               </span>
             </div>
 

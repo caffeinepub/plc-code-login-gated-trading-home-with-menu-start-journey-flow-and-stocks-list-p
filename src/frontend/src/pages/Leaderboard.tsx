@@ -135,7 +135,7 @@ export default function Leaderboard({ onBack }: LeaderboardProps) {
                       className="text-xs mt-0.5"
                       style={{ color: "oklch(0.50 0.02 265)" }}
                     >
-                      \u20B9{entry.totalInvested.toLocaleString("en-IN")}
+                      ₹{entry.totalInvested.toLocaleString("en-IN")}
                     </p>
                   </div>
 
@@ -214,7 +214,7 @@ export default function Leaderboard({ onBack }: LeaderboardProps) {
                   className="font-bold text-sm"
                   style={{ color: rc ? rc.label : "oklch(0.72 0.01 80)" }}
                 >
-                  \u20B9{entry.totalInvested.toLocaleString("en-IN")}
+                  ₹{entry.totalInvested.toLocaleString("en-IN")}
                 </p>
               </div>
             );
@@ -242,7 +242,7 @@ export default function Leaderboard({ onBack }: LeaderboardProps) {
                 #{userEntry.rank} \u2014 {maskName(userEntry.name)} (You)
               </p>
               <p className="font-bold text-sm text-foreground">
-                \u20B9{userEntry.totalInvested.toLocaleString("en-IN")}
+                ₹{userEntry.totalInvested.toLocaleString("en-IN")}
               </p>
             </div>
           </div>

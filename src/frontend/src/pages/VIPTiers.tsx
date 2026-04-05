@@ -26,7 +26,7 @@ const TIERS: Array<{
     id: "bronze",
     name: "Bronze",
     icon: "\uD83E\uDD49",
-    range: "\u20B90 \u2013 \u20B94,999",
+    range: "₹0 \u2013 ₹4,999",
     min: 0,
     max: 5000,
     color: "oklch(0.65 0.13 55)",
@@ -41,7 +41,7 @@ const TIERS: Array<{
     id: "silver",
     name: "Silver",
     icon: "\uD83E\uDD48",
-    range: "\u20B95,000 \u2013 \u20B919,999",
+    range: "₹5,000 \u2013 ₹19,999",
     min: 5000,
     max: 20000,
     color: "oklch(0.78 0.05 265)",
@@ -57,7 +57,7 @@ const TIERS: Array<{
     id: "gold",
     name: "Gold",
     icon: "\uD83E\uDD47",
-    range: "\u20B920,000 \u2013 \u20B949,999",
+    range: "₹20,000 \u2013 ₹49,999",
     min: 20000,
     max: 50000,
     color: "oklch(0.80 0.19 82)",
@@ -74,7 +74,7 @@ const TIERS: Array<{
     id: "platinum",
     name: "Platinum",
     icon: "\uD83D\uDC8E",
-    range: "\u20B950,000+",
+    range: "₹50,000+",
     min: 50000,
     max: null,
     color: "oklch(0.70 0.20 290)",
@@ -85,7 +85,7 @@ const TIERS: Array<{
       "Personal VIP advisor",
       "Platinum-only plans (20%+)",
       "Zero transaction fees",
-      "Annual bonus up to \u20B925,000",
+      "Annual bonus up to ₹25,000",
     ],
   },
 ];
@@ -185,7 +185,7 @@ export default function VIPTiers({ onBack }: VIPTiersProps) {
               className="font-bold"
               style={{ color: "oklch(0.88 0.01 80)" }}
             >
-              \u20B9{totalInvested.toLocaleString("en-IN")}
+              ₹{totalInvested.toLocaleString("en-IN")}
             </span>
           </div>
 
@@ -196,7 +196,7 @@ export default function VIPTiers({ onBack }: VIPTiersProps) {
                   Progress to {nextTier.name}
                 </span>
                 <span className="font-bold" style={{ color: nextTier.color }}>
-                  \u20B9{amountToNext.toLocaleString("en-IN")} more
+                  ₹{amountToNext.toLocaleString("en-IN")} more
                 </span>
               </div>
               <Progress

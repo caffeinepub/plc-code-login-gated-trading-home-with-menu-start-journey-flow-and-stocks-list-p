@@ -563,6 +563,50 @@ function PaymentsTab({
               {p.utr}
             </p>
           </div>
+          {p.screenshot && (
+            <div style={{ marginBottom: 10 }}>
+              <p
+                style={{
+                  fontSize: "0.65rem",
+                  color: "oklch(0.45 0.02 265)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.1em",
+                  marginBottom: 6,
+                }}
+              >
+                Payment Screenshot
+              </p>
+              <a
+                href={p.screenshot}
+                target="_blank"
+                rel="noreferrer"
+                style={{ display: "block" }}
+              >
+                <img
+                  src={p.screenshot}
+                  alt="Payment screenshot"
+                  style={{
+                    width: "100%",
+                    maxHeight: 220,
+                    objectFit: "contain",
+                    borderRadius: 8,
+                    border: "1px solid oklch(0.22 0.03 265)",
+                    background: "oklch(0.09 0.02 265)",
+                  }}
+                />
+              </a>
+              <p
+                style={{
+                  fontSize: "0.6rem",
+                  color: "oklch(0.40 0.02 265)",
+                  marginTop: 4,
+                  textAlign: "center",
+                }}
+              >
+                Tap to view full size
+              </p>
+            </div>
+          )}
           {p.status === "pending" && (
             <div style={{ display: "flex", gap: 8 }}>
               <button
@@ -1268,6 +1312,51 @@ function KycTab({
                 </p>
               </div>
             </div>
+            {k.docImage && (
+              <div style={{ marginBottom: 10 }}>
+                <p
+                  style={{
+                    fontSize: "0.65rem",
+                    color: "oklch(0.45 0.02 265)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.1em",
+                    marginBottom: 6,
+                  }}
+                >
+                  {k.docType === "aadhaar" ? "Aadhaar Card" : "PAN Card"}{" "}
+                  Document
+                </p>
+                <a
+                  href={k.docImage}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ display: "block" }}
+                >
+                  <img
+                    src={k.docImage}
+                    alt="KYC document"
+                    style={{
+                      width: "100%",
+                      maxHeight: 220,
+                      objectFit: "contain",
+                      borderRadius: 8,
+                      border: "1px solid oklch(0.22 0.03 265)",
+                      background: "oklch(0.09 0.02 265)",
+                    }}
+                  />
+                </a>
+                <p
+                  style={{
+                    fontSize: "0.6rem",
+                    color: "oklch(0.40 0.02 265)",
+                    marginTop: 4,
+                    textAlign: "center",
+                  }}
+                >
+                  Tap to view full size
+                </p>
+              </div>
+            )}
             {k.status === "pending" && (
               <div style={{ display: "flex", gap: 8 }}>
                 <button

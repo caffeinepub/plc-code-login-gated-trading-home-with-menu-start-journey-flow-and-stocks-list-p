@@ -29,7 +29,7 @@ const STOCK_PLANS = [
 
 function getPlanName(amount: number): string {
   const plan = STOCK_PLANS.find((p) => p.amount === amount);
-  return plan ? plan.name : `Plan \u20b9${amount.toLocaleString("en-IN")}`;
+  return plan ? plan.name : `Plan ₹${amount.toLocaleString("en-IN")}`;
 }
 
 function formatDate(iso: string): string {

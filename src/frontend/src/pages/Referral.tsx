@@ -152,10 +152,7 @@ export default function Referral({ onBack }: ReferralProps) {
           >
             Share this code with friends. When they join FSC using your code,
             you both earn{" "}
-            <strong style={{ color: "oklch(0.78 0.18 82)" }}>
-              \u20b950 bonus
-            </strong>
-            .
+            <strong style={{ color: "oklch(0.78 0.18 82)" }}>₹50 bonus</strong>.
           </p>
         </div>
 
