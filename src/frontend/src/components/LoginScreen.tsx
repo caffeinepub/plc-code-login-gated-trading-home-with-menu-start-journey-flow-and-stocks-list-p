@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { ArrowRight, Mail, Smartphone, User } from "lucide-react";
+import { ArrowRight, Mail, Shield, Smartphone, User } from "lucide-react";
 import { useState } from "react";
 import { backendRegisterUser } from "../lib/backendStore";
 import {
@@ -13,6 +13,16 @@ interface LoginScreenProps {
   onLogin: () => void;
   onAdminAccess?: () => void;
 }
+
+const PARTICLES = [
+  { id: "p1", size: 3, left: "8%", top: "15%", delay: "0s", opacity: 0.35 },
+  { id: "p2", size: 4, left: "88%", top: "20%", delay: "0.5s", opacity: 0.28 },
+  { id: "p3", size: 3, left: "5%", top: "70%", delay: "1.0s", opacity: 0.3 },
+  { id: "p4", size: 5, left: "92%", top: "75%", delay: "0.3s", opacity: 0.22 },
+  { id: "p5", size: 3, left: "50%", top: "5%", delay: "0.8s", opacity: 0.25 },
+  { id: "p6", size: 4, left: "15%", top: "90%", delay: "1.2s", opacity: 0.2 },
+  { id: "p7", size: 3, left: "80%", top: "88%", delay: "0.6s", opacity: 0.18 },
+];
 
 export default function LoginScreen({
   onLogin,
@@ -42,7 +52,6 @@ export default function LoginScreen({
     }
     setPhoneError("");
 
-    // Check blocklist (Feature 17)
     if (isBlocked(cleaned)) {
       setPhoneError(
         "This number has been blocked. Contact support to resolve this.",
@@ -54,7 +63,6 @@ export default function LoginScreen({
     if (existingRaw) {
       try {
         const existing = JSON.parse(existingRaw) as FscUser;
-        // Check suspension (Feature 5)
         if (existing.suspended) {
           setPhoneError(
             `Your account has been suspended. Reason: ${
@@ -81,7 +89,6 @@ export default function LoginScreen({
     };
     saveUser(user);
     registerUserGlobally(cleaned);
-    // Fire-and-forget backend registration
     backendRegisterUser(user).catch(() => {});
     onLogin();
   }
@@ -89,12 +96,12 @@ export default function LoginScreen({
   return (
     <div
       style={{
-        position: "fixed",
         inset: 0,
         background: `
-          radial-gradient(ellipse 80% 50% at 20% -5%, oklch(0.78 0.18 82 / 0.07) 0%, transparent 55%),
-          radial-gradient(ellipse 60% 40% at 80% 100%, oklch(0.65 0.18 200 / 0.04) 0%, transparent 55%),
-          radial-gradient(ellipse at 50% 30%, oklch(0.14 0.028 265) 0%, oklch(0.08 0.018 265) 100%)
+          radial-gradient(ellipse 100% 60% at 50% -10%, oklch(0.40 0.22 215 / 0.22) 0%, transparent 55%),
+          radial-gradient(ellipse 60% 50% at 5% 100%, oklch(0.50 0.20 195 / 0.14) 0%, transparent 50%),
+          radial-gradient(ellipse 50% 40% at 95% 50%, oklch(0.45 0.22 255 / 0.12) 0%, transparent 50%),
+          linear-gradient(165deg, oklch(0.06 0.04 248) 0%, oklch(0.08 0.038 238) 60%, oklch(0.07 0.035 242) 100%)
         `,
         display: "flex",
         flexDirection: "column",
@@ -102,10 +109,37 @@ export default function LoginScreen({
         justifyContent: "center",
         padding: "24px",
         overflowY: "auto",
+        position: "relative" as const,
       }}
     >
+      {/* Background particles */}
+      {PARTICLES.map((p) => (
+        <span
+          key={p.id}
+          className="float-dot"
+          style={{
+            position: "absolute",
+            left: p.left,
+            top: p.top,
+            width: p.size,
+            height: p.size,
+            borderRadius: "50%",
+            background: "oklch(0.65 0.22 220)",
+            opacity: p.opacity,
+            animationDelay: p.delay,
+          }}
+        />
+      ))}
+
       {/* Logo */}
-      <div style={{ textAlign: "center", marginBottom: 36 }}>
+      <div
+        style={{
+          textAlign: "center",
+          marginBottom: 32,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
         <div
           style={{
             position: "relative",
@@ -113,16 +147,16 @@ export default function LoginScreen({
             marginBottom: 16,
           }}
         >
-          {/* Golden ring behind logo */}
+          {/* Blue ring behind logo */}
           <div
             className="glow-pulse"
             style={{
               position: "absolute",
-              inset: -12,
+              inset: -14,
               borderRadius: "50%",
               background:
-                "radial-gradient(circle, oklch(0.78 0.18 82 / 0.2) 0%, transparent 65%)",
-              border: "1px solid oklch(0.78 0.18 82 / 0.3)",
+                "radial-gradient(circle, oklch(0.55 0.20 220 / 0.28) 0%, transparent 70%)",
+              border: "1.5px solid oklch(0.65 0.22 220 / 0.38)",
             }}
           />
           <img
@@ -134,7 +168,7 @@ export default function LoginScreen({
               objectFit: "contain",
               display: "block",
               filter:
-                "drop-shadow(0 0 24px oklch(0.78 0.18 82 / 0.7)) drop-shadow(0 0 48px oklch(0.78 0.18 82 / 0.35))",
+                "drop-shadow(0 0 24px oklch(0.65 0.22 220 / 0.80)) drop-shadow(0 0 48px oklch(0.55 0.20 220 / 0.48))",
               position: "relative",
               zIndex: 1,
             }}
@@ -146,7 +180,7 @@ export default function LoginScreen({
             fontSize: "3rem",
             fontWeight: 800,
             background:
-              "linear-gradient(135deg, oklch(0.96 0.16 95), oklch(0.84 0.22 84), oklch(0.74 0.20 76))",
+              "linear-gradient(135deg, oklch(0.92 0.12 198), oklch(0.78 0.22 212), oklch(0.68 0.26 228))",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
@@ -162,29 +196,97 @@ export default function LoginScreen({
             fontSize: "0.75rem",
             letterSpacing: "0.22em",
             textTransform: "uppercase",
-            color: "oklch(0.62 0.09 84)",
+            color: "oklch(0.58 0.14 215)",
           }}
         >
           Foreign Smart Coins
         </p>
       </div>
 
-      {/* Card with gradient border */}
+      {/* Step indicator */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 16,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "0.75rem",
+            fontWeight: 700,
+            background:
+              "linear-gradient(135deg, oklch(0.62 0.24 218), oklch(0.52 0.26 232))",
+            color: "white",
+            boxShadow: "0 0 12px oklch(0.55 0.22 220 / 0.5)",
+          }}
+        >
+          1
+        </div>
+        <div
+          style={{
+            width: 32,
+            height: 2,
+            background:
+              step === 2
+                ? "linear-gradient(90deg, oklch(0.65 0.22 220), oklch(0.72 0.18 195))"
+                : "oklch(0.22 0.06 232)",
+            borderRadius: 2,
+            transition: "background 0.3s ease",
+          }}
+        />
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "0.75rem",
+            fontWeight: 700,
+            background:
+              step === 2
+                ? "linear-gradient(135deg, oklch(0.62 0.24 218), oklch(0.52 0.26 232))"
+                : "oklch(0.15 0.05 232)",
+            color: step === 2 ? "white" : "oklch(0.42 0.06 220)",
+            border: step === 2 ? "none" : "1px solid oklch(0.28 0.07 230)",
+            boxShadow:
+              step === 2 ? "0 0 12px oklch(0.55 0.22 220 / 0.5)" : "none",
+            transition: "all 0.3s ease",
+          }}
+        >
+          2
+        </div>
+      </div>
+
+      {/* Card with blue gradient border */}
       <div
         style={{
           padding: 1,
           borderRadius: 22,
           background:
-            "linear-gradient(135deg, oklch(0.78 0.18 82 / 0.5), oklch(0.55 0.18 200 / 0.25), oklch(0.78 0.18 82 / 0.5))",
+            "linear-gradient(135deg, oklch(0.65 0.22 220 / 0.55), oklch(0.72 0.18 195 / 0.30), oklch(0.55 0.22 255 / 0.40))",
           boxShadow:
-            "0 0 60px oklch(0.78 0.18 82 / 0.12), 0 24px 80px oklch(0 0 0 / 0.6)",
+            "0 0 80px oklch(0.55 0.22 220 / 0.15), 0 32px 80px oklch(0 0 0 / 0.55)",
           width: "100%",
           maxWidth: 380,
+          position: "relative",
+          zIndex: 1,
         }}
       >
         <div
           style={{
-            background: "oklch(0.12 0.024 265)",
+            background: "oklch(0.10 0.04 238)",
             borderRadius: 21,
             padding: "32px 28px",
           }}
@@ -194,7 +296,7 @@ export default function LoginScreen({
             style={{
               fontSize: "1.6rem",
               fontWeight: 700,
-              color: "oklch(0.96 0.005 80)",
+              color: "oklch(0.96 0.008 200)",
               marginBottom: 6,
             }}
           >
@@ -204,7 +306,7 @@ export default function LoginScreen({
             className="font-sans"
             style={{
               fontSize: "0.875rem",
-              color: "oklch(0.50 0.02 265)",
+              color: "oklch(0.50 0.05 225)",
               marginBottom: 28,
               lineHeight: 1.5,
             }}
@@ -225,7 +327,7 @@ export default function LoginScreen({
                     transform: "translateY(-50%)",
                     width: 18,
                     height: 18,
-                    color: "oklch(0.78 0.18 82)",
+                    color: "oklch(0.65 0.22 220)",
                     zIndex: 1,
                   }}
                 />
@@ -236,9 +338,9 @@ export default function LoginScreen({
                   placeholder="Your full name"
                   style={{
                     paddingLeft: 44,
-                    background: "oklch(0.16 0.028 265)",
-                    borderColor: "oklch(0.28 0.042 265)",
-                    color: "oklch(0.96 0.005 80)",
+                    background: "oklch(0.14 0.048 240)",
+                    borderColor: "oklch(0.28 0.07 230)",
+                    color: "oklch(0.96 0.008 200)",
                     borderRadius: 14,
                     height: 48,
                     fontSize: "0.95rem",
@@ -283,7 +385,7 @@ export default function LoginScreen({
                     transform: "translateY(-50%)",
                     width: 18,
                     height: 18,
-                    color: "oklch(0.78 0.18 82)",
+                    color: "oklch(0.65 0.22 220)",
                     zIndex: 1,
                   }}
                 />
@@ -296,9 +398,9 @@ export default function LoginScreen({
                   inputMode="numeric"
                   style={{
                     paddingLeft: 44,
-                    background: "oklch(0.16 0.028 265)",
-                    borderColor: "oklch(0.28 0.042 265)",
-                    color: "oklch(0.96 0.005 80)",
+                    background: "oklch(0.14 0.048 240)",
+                    borderColor: "oklch(0.28 0.07 230)",
+                    color: "oklch(0.96 0.008 200)",
                     borderRadius: 14,
                     height: 48,
                     fontSize: "0.95rem",
@@ -333,7 +435,7 @@ export default function LoginScreen({
                 type="button"
                 onClick={() => setStep(1)}
                 className="w-full mt-2 py-2.5 text-sm font-medium transition-colors"
-                style={{ color: "oklch(0.50 0.02 265)" }}
+                style={{ color: "oklch(0.48 0.06 225)" }}
               >
                 ← Back
               </button>
@@ -345,19 +447,38 @@ export default function LoginScreen({
             style={{
               marginTop: 20,
               paddingTop: 16,
-              borderTop: "1px solid oklch(0.22 0.034 265)",
+              borderTop: "1px solid oklch(0.20 0.055 235)",
               textAlign: "center",
             }}
           >
-            <p
+            <div
               style={{
-                fontSize: "0.68rem",
-                color: "oklch(0.42 0.02 265)",
-                letterSpacing: "0.02em",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "6px 14px",
+                borderRadius: 999,
+                background: "oklch(0.65 0.22 220 / 0.08)",
+                border: "1px solid oklch(0.65 0.22 220 / 0.18)",
               }}
             >
-              🔐 256-bit encrypted • Secure transactions
-            </p>
+              <Shield
+                style={{
+                  width: 12,
+                  height: 12,
+                  color: "oklch(0.65 0.22 220)",
+                }}
+              />
+              <p
+                style={{
+                  fontSize: "0.68rem",
+                  color: "oklch(0.55 0.08 220)",
+                  letterSpacing: "0.02em",
+                }}
+              >
+                256-bit encrypted • Secure blockchain
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -372,23 +493,28 @@ export default function LoginScreen({
           display: "inline-flex",
           alignItems: "center",
           gap: 6,
-          padding: "8px 18px",
+          padding: "9px 20px",
           borderRadius: 999,
-          background: "oklch(0.78 0.18 82 / 0.1)",
-          border: "1px solid oklch(0.78 0.18 82 / 0.25)",
-          color: "oklch(0.82 0.12 84)",
+          background: "oklch(0.65 0.22 220 / 0.10)",
+          border: "1px solid oklch(0.65 0.22 220 / 0.28)",
+          color: "oklch(0.72 0.18 215)",
           fontSize: "0.75rem",
           fontWeight: 600,
           letterSpacing: "0.02em",
           textDecoration: "none",
           transition: "all 0.2s ease",
+          position: "relative",
+          zIndex: 1,
         }}
       >
         <Mail style={{ width: 13, height: 13 }} />
         Customer Care
       </a>
 
-      <p className="text-muted-foreground mt-4" style={{ fontSize: "0.65rem" }}>
+      <p
+        className="text-muted-foreground mt-4"
+        style={{ fontSize: "0.65rem", position: "relative", zIndex: 1 }}
+      >
         © {new Date().getFullYear()} FSC Foreign Smart Coins. All rights
         reserved.
       </p>
@@ -400,11 +526,13 @@ export default function LoginScreen({
         style={{
           marginTop: 10,
           fontSize: "0.6rem",
-          color: "oklch(0.28 0.02 265)",
+          color: "oklch(0.25 0.04 240)",
           background: "transparent",
           border: "none",
           cursor: "pointer",
           letterSpacing: "0.05em",
+          position: "relative",
+          zIndex: 1,
         }}
         data-ocid="login.admin.link"
       >

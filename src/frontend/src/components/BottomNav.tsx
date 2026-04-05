@@ -34,29 +34,26 @@ export default function BottomNav({
             }
             className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl transition-all duration-200 relative"
             style={{
-              color: isActive ? "oklch(0.84 0.18 86)" : "oklch(0.48 0.02 265)",
+              color: isActive ? "oklch(0.72 0.20 210)" : "oklch(0.45 0.05 230)",
               background: isActive
-                ? "oklch(0.78 0.18 82 / 0.10)"
+                ? "oklch(0.65 0.22 220 / 0.12)"
                 : "transparent",
               minWidth: 56,
             }}
             data-ocid={`bottom_nav.${item.id}.tab`}
           >
-            {/* Top pill indicator for active */}
             {isActive && (
               <span
                 style={{
                   position: "absolute",
-                  top: 0,
+                  bottom: 2,
                   left: "50%",
                   transform: "translateX(-50%)",
-                  width: 28,
-                  height: 3,
-                  borderRadius: "0 0 3px 3px",
-                  background:
-                    "linear-gradient(90deg, oklch(0.78 0.18 82), oklch(0.92 0.18 92))",
-                  boxShadow:
-                    "0 0 10px oklch(0.78 0.18 82 / 0.8), 0 0 20px oklch(0.78 0.18 82 / 0.4)",
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: "oklch(0.72 0.18 195)",
+                  boxShadow: "0 0 8px oklch(0.65 0.22 220 / 0.8)",
                 }}
               />
             )}

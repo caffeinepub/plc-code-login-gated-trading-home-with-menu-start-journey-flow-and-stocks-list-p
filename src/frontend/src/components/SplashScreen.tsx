@@ -5,18 +5,132 @@ interface SplashScreenProps {
 }
 
 const FLOAT_DOTS = [
-  { size: 4, left: "8%", top: "20%", delay: "0s", opacity: 0.5, id: "d1" },
-  { size: 6, left: "15%", top: "70%", delay: "0.4s", opacity: 0.4, id: "d2" },
-  { size: 3, left: "25%", top: "40%", delay: "0.8s", opacity: 0.6, id: "d3" },
-  { size: 5, left: "75%", top: "25%", delay: "0.2s", opacity: 0.5, id: "d4" },
-  { size: 4, left: "85%", top: "60%", delay: "0.6s", opacity: 0.4, id: "d5" },
-  { size: 7, left: "90%", top: "80%", delay: "1.0s", opacity: 0.3, id: "d6" },
-  { size: 3, left: "50%", top: "15%", delay: "1.2s", opacity: 0.5, id: "d7" },
-  { size: 5, left: "60%", top: "75%", delay: "0.3s", opacity: 0.4, id: "d8" },
-  { size: 4, left: "35%", top: "85%", delay: "0.7s", opacity: 0.3, id: "d9" },
-  { size: 6, left: "45%", top: "50%", delay: "1.5s", opacity: 0.25, id: "d10" },
-  { size: 3, left: "70%", top: "45%", delay: "0.9s", opacity: 0.35, id: "d11" },
-  { size: 5, left: "20%", top: "55%", delay: "1.3s", opacity: 0.3, id: "d12" },
+  {
+    size: 4,
+    left: "8%",
+    top: "20%",
+    delay: "0s",
+    opacity: 0.5,
+    id: "d1",
+    color: "oklch(0.65 0.22 220)",
+  },
+  {
+    size: 6,
+    left: "15%",
+    top: "70%",
+    delay: "0.4s",
+    opacity: 0.4,
+    id: "d2",
+    color: "oklch(0.72 0.18 195)",
+  },
+  {
+    size: 3,
+    left: "25%",
+    top: "40%",
+    delay: "0.8s",
+    opacity: 0.6,
+    id: "d3",
+    color: "oklch(0.65 0.22 220)",
+  },
+  {
+    size: 5,
+    left: "75%",
+    top: "25%",
+    delay: "0.2s",
+    opacity: 0.5,
+    id: "d4",
+    color: "oklch(0.55 0.20 260)",
+  },
+  {
+    size: 4,
+    left: "85%",
+    top: "60%",
+    delay: "0.6s",
+    opacity: 0.4,
+    id: "d5",
+    color: "oklch(0.72 0.18 195)",
+  },
+  {
+    size: 7,
+    left: "90%",
+    top: "80%",
+    delay: "1.0s",
+    opacity: 0.35,
+    id: "d6",
+    color: "oklch(0.65 0.22 220)",
+  },
+  {
+    size: 3,
+    left: "50%",
+    top: "12%",
+    delay: "1.2s",
+    opacity: 0.55,
+    id: "d7",
+    color: "oklch(0.78 0.16 205)",
+  },
+  {
+    size: 5,
+    left: "60%",
+    top: "75%",
+    delay: "0.3s",
+    opacity: 0.4,
+    id: "d8",
+    color: "oklch(0.55 0.20 260)",
+  },
+  {
+    size: 4,
+    left: "35%",
+    top: "85%",
+    delay: "0.7s",
+    opacity: 0.3,
+    id: "d9",
+    color: "oklch(0.72 0.18 195)",
+  },
+  {
+    size: 6,
+    left: "45%",
+    top: "50%",
+    delay: "1.5s",
+    opacity: 0.22,
+    id: "d10",
+    color: "oklch(0.65 0.22 220)",
+  },
+  {
+    size: 3,
+    left: "70%",
+    top: "45%",
+    delay: "0.9s",
+    opacity: 0.38,
+    id: "d11",
+    color: "oklch(0.78 0.16 205)",
+  },
+  {
+    size: 5,
+    left: "20%",
+    top: "55%",
+    delay: "1.3s",
+    opacity: 0.3,
+    id: "d12",
+    color: "oklch(0.55 0.20 260)",
+  },
+  {
+    size: 8,
+    left: "5%",
+    top: "48%",
+    delay: "0.5s",
+    opacity: 0.2,
+    id: "d13",
+    color: "oklch(0.65 0.22 220)",
+  },
+  {
+    size: 4,
+    left: "95%",
+    top: "35%",
+    delay: "1.1s",
+    opacity: 0.28,
+    id: "d14",
+    color: "oklch(0.72 0.18 195)",
+  },
 ];
 
 export default function SplashScreen({ onComplete }: SplashScreenProps) {
@@ -43,13 +157,15 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         alignItems: "center",
         justifyContent: "center",
         background: `
-          radial-gradient(ellipse 80% 50% at 20% -5%, oklch(0.78 0.18 82 / 0.08) 0%, transparent 55%),
-          radial-gradient(ellipse 60% 40% at 80% 100%, oklch(0.65 0.18 200 / 0.05) 0%, transparent 55%),
-          radial-gradient(ellipse at 50% 40%, oklch(0.13 0.028 265) 0%, oklch(0.08 0.018 265) 100%)
+          radial-gradient(ellipse 80% 60% at 50% -20%, oklch(0.35 0.18 220 / 0.28) 0%, transparent 60%),
+          radial-gradient(ellipse 60% 50% at 10% 90%, oklch(0.50 0.20 195 / 0.14) 0%, transparent 55%),
+          radial-gradient(ellipse 50% 40% at 90% 20%, oklch(0.45 0.22 260 / 0.12) 0%, transparent 50%),
+          linear-gradient(180deg, oklch(0.06 0.04 245) 0%, oklch(0.08 0.038 238) 50%, oklch(0.07 0.035 240) 100%)
         `,
         overflow: "hidden",
       }}
     >
+      {/* Floating particles */}
       {FLOAT_DOTS.map((dot) => (
         <span
           key={dot.id}
@@ -61,41 +177,41 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
             width: dot.size,
             height: dot.size,
             borderRadius: "50%",
-            background: "oklch(0.78 0.18 82)",
+            background: dot.color,
             opacity: dot.opacity,
             animationDelay: dot.delay,
           }}
         />
       ))}
 
-      {/* Ambient glow orb — large background */}
+      {/* Large ambient glow orb */}
       <div
         style={{
           position: "absolute",
-          width: 500,
-          height: 500,
+          width: 520,
+          height: 520,
           borderRadius: "50%",
           background:
-            "radial-gradient(circle, oklch(0.78 0.18 82 / 0.10) 0%, transparent 65%)",
+            "radial-gradient(circle, oklch(0.55 0.22 220 / 0.12) 0%, transparent 65%)",
           pointerEvents: "none",
         }}
       />
 
-      {/* Inner glow */}
+      {/* Inner glow pulse */}
       <div
         className="glow-pulse"
         style={{
           position: "absolute",
-          width: 320,
-          height: 320,
+          width: 340,
+          height: 340,
           borderRadius: "50%",
           background:
-            "radial-gradient(circle, oklch(0.78 0.18 82 / 0.16) 0%, transparent 70%)",
+            "radial-gradient(circle, oklch(0.65 0.22 220 / 0.18) 0%, transparent 70%)",
           pointerEvents: "none",
         }}
       />
 
-      {/* Logo container with rings */}
+      {/* Logo container with concentric rings */}
       <div
         style={{
           position: "relative",
@@ -105,27 +221,29 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           marginBottom: 32,
         }}
       >
-        {/* Ring 2 — outer */}
+        {/* Outer ring */}
         <div
+          className="ring-pulse"
           style={{
             position: "absolute",
-            width: 280,
-            height: 280,
+            width: 230,
+            height: 230,
             borderRadius: "50%",
-            border: "1px solid oklch(0.78 0.18 82 / 0.15)",
-            animation: "ring-pulse 2s ease-in-out infinite",
-            animationDelay: "0.5s",
+            border: "1.5px solid oklch(0.65 0.22 220 / 0.28)",
+            pointerEvents: "none",
           }}
         />
-        {/* Ring 1 — inner */}
+        {/* Inner ring */}
         <div
+          className="ring-pulse"
           style={{
             position: "absolute",
-            width: 200,
-            height: 200,
+            width: 185,
+            height: 185,
             borderRadius: "50%",
-            border: "1px solid oklch(0.78 0.18 82 / 0.3)",
-            animation: "ring-pulse 2s ease-in-out infinite",
+            border: "1px solid oklch(0.72 0.18 195 / 0.38)",
+            animationDelay: "0.4s",
+            pointerEvents: "none",
           }}
         />
 
@@ -137,13 +255,14 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
             height: 160,
             objectFit: "contain",
             filter:
-              "drop-shadow(0 0 40px oklch(0.78 0.18 82 / 0.8)) drop-shadow(0 0 80px oklch(0.78 0.18 82 / 0.4))",
+              "drop-shadow(0 0 40px oklch(0.65 0.22 220 / 0.90)) drop-shadow(0 0 80px oklch(0.55 0.20 220 / 0.55)) drop-shadow(0 0 120px oklch(0.45 0.18 240 / 0.35))",
             position: "relative",
             zIndex: 1,
           }}
         />
       </div>
 
+      {/* FSC Text */}
       <h1
         className="font-display"
         style={{
@@ -152,7 +271,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           letterSpacing: "-0.02em",
           lineHeight: 1,
           background:
-            "linear-gradient(135deg, oklch(0.96 0.16 95) 0%, oklch(0.84 0.22 84) 50%, oklch(0.88 0.18 86) 100%)",
+            "linear-gradient(135deg, oklch(0.92 0.12 198) 0%, oklch(0.78 0.22 212) 50%, oklch(0.68 0.26 228) 100%)",
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
           backgroundClip: "text",
@@ -170,7 +289,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           fontWeight: 500,
           letterSpacing: "0.28em",
           textTransform: "uppercase",
-          color: "oklch(0.78 0.12 84)",
+          color: "oklch(0.68 0.16 210)",
           marginBottom: 8,
           textAlign: "center",
         }}
@@ -184,7 +303,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           fontSize: "0.92rem",
           fontStyle: "italic",
           fontWeight: 400,
-          color: "oklch(0.55 0.06 265)",
+          color: "oklch(0.50 0.10 225)",
           marginBottom: 10,
           textAlign: "center",
           letterSpacing: "0.04em",
@@ -198,13 +317,27 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           fontSize: "0.65rem",
           letterSpacing: "0.16em",
           textTransform: "uppercase",
-          color: "oklch(0.40 0.04 265)",
+          color: "oklch(0.38 0.06 235)",
           marginBottom: 72,
           textAlign: "center",
         }}
       >
         Powered by Internet Computer
       </p>
+
+      {/* Bottom wave decoration */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 60,
+          background:
+            "linear-gradient(0deg, oklch(0.55 0.22 220 / 0.06) 0%, transparent 100%)",
+          pointerEvents: "none",
+        }}
+      />
 
       {/* Progress bar */}
       <div
@@ -214,7 +347,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           left: 0,
           right: 0,
           height: 4,
-          background: "oklch(0.18 0.03 265)",
+          background: "oklch(0.15 0.05 235)",
         }}
       >
         <div
@@ -222,11 +355,11 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           style={{
             height: "100%",
             background:
-              "linear-gradient(90deg, oklch(0.68 0.18 82), oklch(0.88 0.20 86), oklch(0.96 0.14 92), oklch(0.88 0.20 86), oklch(0.68 0.18 82))",
+              "linear-gradient(90deg, oklch(0.45 0.22 235), oklch(0.65 0.24 218), oklch(0.82 0.18 200), oklch(0.65 0.24 218), oklch(0.45 0.22 235))",
             backgroundSize: "200% 100%",
             width: 0,
             boxShadow:
-              "0 0 16px oklch(0.78 0.18 82 / 0.9), 0 0 32px oklch(0.78 0.18 82 / 0.5)",
+              "0 0 16px oklch(0.65 0.22 220 / 0.9), 0 0 32px oklch(0.55 0.22 220 / 0.5)",
           }}
         />
       </div>
@@ -243,7 +376,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
             fontSize: "0.65rem",
             letterSpacing: "0.2em",
             textTransform: "uppercase",
-            color: "oklch(0.38 0.03 265)",
+            color: "oklch(0.35 0.05 230)",
           }}
         >
           Premium Financial Intelligence

@@ -65,7 +65,7 @@ const QUICK_ACTIONS = [
     id: "add-funds",
     label: "Add Funds",
     icon: BadgeDollarSign,
-    color: "oklch(0.78 0.18 82)",
+    color: "oklch(0.65 0.22 220)",
     bg: "oklch(0.78 0.18 82 / 0.14)",
   },
   {
@@ -117,7 +117,7 @@ function AnnouncementTicker({ text }: { text: string }) {
           style={{
             width: 12,
             height: 12,
-            color: "oklch(0.78 0.18 82)",
+            color: "oklch(0.65 0.22 220)",
             flexShrink: 0,
           }}
         />
@@ -125,7 +125,7 @@ function AnnouncementTicker({ text }: { text: string }) {
           style={{
             fontSize: "0.75rem",
             fontWeight: 600,
-            color: "oklch(0.88 0.12 82)",
+            color: "oklch(0.82 0.12 210)",
             letterSpacing: "0.03em",
           }}
         >
@@ -157,7 +157,7 @@ function BroadcastCard({
         gap: 10,
         alignItems: "flex-start",
         marginBottom: 8,
-        boxShadow: "0 4px 16px oklch(0.78 0.18 82 / 0.08)",
+        boxShadow: "0 4px 16px oklch(0.55 0.22 220 / 0.10)",
       }}
     >
       <div
@@ -177,7 +177,7 @@ function BroadcastCard({
           style={{
             width: 14,
             height: 14,
-            color: "oklch(0.78 0.18 82)",
+            color: "oklch(0.65 0.22 220)",
           }}
         />
       </div>
@@ -186,7 +186,7 @@ function BroadcastCard({
           style={{
             fontSize: "0.82rem",
             fontWeight: 700,
-            color: "oklch(0.90 0.12 84)",
+            color: "oklch(0.88 0.10 210)",
             marginBottom: 2,
           }}
         >
@@ -209,7 +209,7 @@ function BroadcastCard({
           background: "transparent",
           border: "none",
           cursor: "pointer",
-          color: "oklch(0.42 0.02 265)",
+          color: "oklch(0.38 0.04 225)",
           padding: 4,
           flexShrink: 0,
           borderRadius: 6,
@@ -287,9 +287,9 @@ export default function Home({
         minHeight: "100vh",
         paddingBottom: "5rem",
         background: `
-          radial-gradient(ellipse 100% 60% at 50% -10%, oklch(0.78 0.18 82 / 0.08) 0%, transparent 60%),
-          radial-gradient(ellipse 60% 40% at 90% 80%, oklch(0.65 0.18 200 / 0.04) 0%, transparent 50%),
-          oklch(0.08 0.018 265)
+          radial-gradient(ellipse 100% 60% at 50% -10%, oklch(0.55 0.22 220 / 0.10) 0%, transparent 60%),
+          radial-gradient(ellipse 60% 40% at 90% 80%, oklch(0.65 0.18 200 / 0.05) 0%, transparent 50%),
+          oklch(0.07 0.035 240)
         `,
         backgroundAttachment: "fixed",
       }}
@@ -363,7 +363,7 @@ export default function Home({
         <div className="animate-fade-in-up stagger-1 mb-4">
           <p
             className="text-sm mb-0.5"
-            style={{ color: "oklch(0.48 0.03 265)" }}
+            style={{ color: "oklch(0.45 0.05 225)" }}
           >
             {getGreeting()} ✨
           </p>
@@ -402,16 +402,16 @@ export default function Home({
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Coins
-                style={{ width: 15, height: 15, color: "oklch(0.78 0.18 82)" }}
+                style={{ width: 15, height: 15, color: "oklch(0.65 0.22 220)" }}
               />
               <span
                 className="text-xs uppercase tracking-widest font-semibold"
                 style={{
-                  color: "oklch(0.55 0.03 265)",
+                  color: "oklch(0.52 0.06 225)",
                   letterSpacing: "0.14em",
                 }}
               >
-                Total Portfolio Value
+                My Balance
               </span>
             </div>
             <div className="flex items-center gap-1.5">
@@ -438,7 +438,7 @@ export default function Home({
           <div className="balance-hero-amount mb-1">
             {formatInr(animatedBalance)}
           </div>
-          <p className="text-xs mb-4" style={{ color: "oklch(0.42 0.02 265)" }}>
+          <p className="text-xs mb-4" style={{ color: "oklch(0.38 0.04 225)" }}>
             Available for withdrawal
           </p>
 
@@ -479,7 +479,7 @@ export default function Home({
                   <p
                     className="text-xs mb-1"
                     style={{
-                      color: "oklch(0.42 0.02 265)",
+                      color: "oklch(0.38 0.04 225)",
                       fontSize: "0.62rem",
                     }}
                   >
@@ -502,7 +502,7 @@ export default function Home({
               onClick={() => onNavigate("add-funds")}
               className="w-full text-xs font-semibold py-2 rounded-xl transition-all"
               style={{
-                color: "oklch(0.82 0.16 84)",
+                color: "oklch(0.78 0.18 215)",
                 background: "oklch(0.78 0.18 82 / 0.1)",
                 border: "1px solid oklch(0.78 0.18 82 / 0.22)",
               }}
@@ -537,7 +537,7 @@ export default function Home({
                 </div>
                 <span
                   className="font-semibold leading-tight"
-                  style={{ fontSize: "0.67rem", color: "oklch(0.84 0.01 80)" }}
+                  style={{ fontSize: "0.67rem", color: "oklch(0.88 0.01 210)" }}
                 >
                   {action.label}
                 </span>

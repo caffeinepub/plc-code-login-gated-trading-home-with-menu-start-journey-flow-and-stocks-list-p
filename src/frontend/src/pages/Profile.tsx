@@ -36,6 +36,8 @@ export default function Profile({ onBack }: ProfileProps) {
     });
   }
 
+  const initial = user?.name?.[0]?.toUpperCase() ?? "U";
+
   return (
     <div className="min-h-screen bg-background bg-grid-pattern">
       <header className="glass-header sticky top-0 z-50">
@@ -45,11 +47,11 @@ export default function Profile({ onBack }: ProfileProps) {
             onClick={onBack}
             style={{
               background: "transparent",
-              border: "1px solid oklch(0.78 0.18 82 / 0.3)",
+              border: "1px solid oklch(0.65 0.22 220 / 0.3)",
               borderRadius: 10,
               padding: "8px",
               cursor: "pointer",
-              color: "oklch(0.78 0.18 82)",
+              color: "oklch(0.65 0.22 220)",
             }}
           >
             <ArrowLeft style={{ width: 20, height: 20 }} />
@@ -67,33 +69,55 @@ export default function Profile({ onBack }: ProfileProps) {
         {/* Profile Picture */}
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div style={{ position: "relative", display: "inline-block" }}>
+            {/* Avatar with blue gradient border */}
             <div
               style={{
-                width: 100,
-                height: 100,
+                padding: 3,
                 borderRadius: "50%",
-                border: "2px solid oklch(0.78 0.18 82 / 0.5)",
-                boxShadow: "0 0 20px oklch(0.78 0.18 82 / 0.3)",
-                overflow: "hidden",
-                background: "oklch(0.78 0.18 82 / 0.1)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "2.5rem",
-                fontFamily: "Playfair Display, serif",
-                fontWeight: 700,
-                color: "oklch(0.78 0.18 82)",
+                background:
+                  "linear-gradient(135deg, oklch(0.65 0.22 220), oklch(0.72 0.18 195))",
+                display: "inline-block",
+                boxShadow: "0 0 24px oklch(0.55 0.22 220 / 0.35)",
               }}
             >
-              {user?.profilePic ? (
-                <img
-                  src={user.profilePic}
-                  alt="Profile"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              ) : (
-                (user?.name?.[0]?.toUpperCase() ?? "U")
-              )}
+              <div
+                style={{
+                  width: 100,
+                  height: 100,
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                  background: "oklch(0.13 0.05 240)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {user?.profilePic ? (
+                  <img
+                    src={user.profilePic}
+                    alt="Profile"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+                ) : (
+                  <span
+                    style={{
+                      fontSize: "2.5rem",
+                      fontFamily: "'Playfair Display', Georgia, serif",
+                      fontWeight: 800,
+                      color: "white",
+                      lineHeight: 1,
+                      userSelect: "none",
+                    }}
+                  >
+                    {initial}
+                  </span>
+                )}
+              </div>
             </div>
             <label
               htmlFor="profile-pic-input"
@@ -101,15 +125,18 @@ export default function Profile({ onBack }: ProfileProps) {
                 position: "absolute",
                 bottom: 4,
                 right: 4,
-                width: 28,
-                height: 28,
+                width: 32,
+                height: 32,
                 borderRadius: "50%",
-                background: "oklch(0.78 0.18 82)",
+                background:
+                  "linear-gradient(135deg, oklch(0.62 0.24 218), oklch(0.52 0.26 232))",
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "oklch(0.1 0.02 265)",
+                color: "white",
+                boxShadow: "0 2px 10px oklch(0.55 0.22 220 / 0.5)",
+                border: "2px solid oklch(0.07 0.035 240)",
               }}
             >
               <Camera style={{ width: 14, height: 14 }} />
@@ -123,7 +150,26 @@ export default function Profile({ onBack }: ProfileProps) {
             style={{ display: "none" }}
             onChange={handleProfilePicChange}
           />
-          <p className="font-sans text-sm text-muted-foreground mt-3">
+          {/* Name display */}
+          {user?.name && (
+            <p
+              className="font-display font-bold mt-3"
+              style={{
+                fontSize: "1.2rem",
+                background:
+                  "linear-gradient(135deg, oklch(0.88 0.12 198), oklch(0.72 0.20 215))",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              {user.name}
+            </p>
+          )}
+          <p
+            className="font-sans text-sm mt-1"
+            style={{ color: "oklch(0.45 0.06 220)" }}
+          >
             Tap the camera icon to change photo
           </p>
         </div>
@@ -133,8 +179,12 @@ export default function Profile({ onBack }: ProfileProps) {
           <div>
             <label
               htmlFor="profile-name"
-              className="font-sans text-sm font-semibold text-foreground"
-              style={{ display: "block", marginBottom: 8 }}
+              className="font-sans text-sm font-semibold"
+              style={{
+                display: "block",
+                marginBottom: 8,
+                color: "oklch(0.72 0.10 215)",
+              }}
             >
               Full Name
             </label>
@@ -149,8 +199,12 @@ export default function Profile({ onBack }: ProfileProps) {
           <div>
             <label
               htmlFor="profile-phone"
-              className="font-sans text-sm font-semibold text-foreground"
-              style={{ display: "block", marginBottom: 8 }}
+              className="font-sans text-sm font-semibold"
+              style={{
+                display: "block",
+                marginBottom: 8,
+                color: "oklch(0.72 0.10 215)",
+              }}
             >
               Phone Number
             </label>
@@ -165,8 +219,12 @@ export default function Profile({ onBack }: ProfileProps) {
           <div>
             <label
               htmlFor="profile-uid"
-              className="font-sans text-sm font-semibold text-foreground"
-              style={{ display: "block", marginBottom: 8 }}
+              className="font-sans text-sm font-semibold"
+              style={{
+                display: "block",
+                marginBottom: 8,
+                color: "oklch(0.72 0.10 215)",
+              }}
             >
               User ID
             </label>
@@ -183,12 +241,18 @@ export default function Profile({ onBack }: ProfileProps) {
                 style={{
                   background: idCopied
                     ? "oklch(0.65 0.2 145 / 0.15)"
-                    : "oklch(0.78 0.18 82 / 0.1)",
-                  border: `1px solid ${idCopied ? "oklch(0.65 0.2 145 / 0.5)" : "oklch(0.78 0.18 82 / 0.3)"}`,
+                    : "oklch(0.65 0.22 220 / 0.12)",
+                  border: `1px solid ${
+                    idCopied
+                      ? "oklch(0.65 0.2 145 / 0.5)"
+                      : "oklch(0.65 0.22 220 / 0.35)"
+                  }`,
                   borderRadius: 10,
                   padding: "0 14px",
                   cursor: "pointer",
-                  color: idCopied ? "#22c55e" : "oklch(0.78 0.18 82)",
+                  color: idCopied
+                    ? "oklch(0.68 0.18 145)"
+                    : "oklch(0.72 0.20 215)",
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
