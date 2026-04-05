@@ -1,6 +1,7 @@
 import { ArrowLeft, Headphones, Plus, Send } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { backendSubmitTicket } from "../lib/backendStore";
 import {
   type SupportTicketLocal,
   getCurrentUser,
@@ -55,6 +56,7 @@ export default function Support({ onBack }: SupportProps) {
       const updated = [newTicket, ...tickets];
       setTickets(updated);
       saveSupportTickets(user.uniqueId, updated);
+      backendSubmitTicket(newTicket).catch(() => {});
       setSubject("");
       setMessage("");
       setShowForm(false);

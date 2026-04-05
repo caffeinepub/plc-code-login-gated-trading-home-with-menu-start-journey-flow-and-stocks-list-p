@@ -4,6 +4,7 @@ import { ArrowLeft, CheckCircle, Upload } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useMarketTicker } from "../hooks/useMarketTicker";
+import { backendSubmitPayment } from "../lib/backendStore";
 import {
   type PaymentSubmission,
   getCurrentUser,
@@ -142,6 +143,8 @@ export default function AddFunds({ initialAmount, onBack }: AddFundsProps) {
     };
     payments.push(submission);
     savePayments(payments);
+    // Fire-and-forget backend sync
+    backendSubmitPayment(submission).catch(() => {});
     setTimeout(() => {
       setIsSubmitting(false);
       setDone(true);
@@ -549,7 +552,7 @@ export default function AddFunds({ initialAmount, onBack }: AddFundsProps) {
                 </p>
                 <p
                   className="font-sans font-semibold"
-                  style={{ color: "oklch(0.85 0.01 80)", fontSize: "0.8rem" }}
+                  style={{ fontSize: "0.8rem", color: "oklch(0.85 0.01 80)" }}
                 >
                   {BANK_ACCOUNT}
                 </p>

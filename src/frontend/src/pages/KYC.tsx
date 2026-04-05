@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { backendSubmitKyc } from "../lib/backendStore";
 import {
   type KycData,
   getCurrentUser,
@@ -55,6 +56,7 @@ export default function KYC({ onBack }: KYCProps) {
         docImage: docImage ?? undefined,
       };
       saveKycData(user.uniqueId, data);
+      backendSubmitKyc(user.uniqueId, data).catch(() => {});
       setKyc(data);
       setSubmitting(false);
       toast.success("KYC submitted for verification!");

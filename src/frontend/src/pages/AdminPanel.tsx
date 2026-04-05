@@ -15,7 +15,18 @@ import {
   Wallet,
   XCircle,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  type AdminPayment,
+  type AdminTicket,
+  type AdminWithdrawal,
+  backendApprovePayment as backendApprovePaymentFn,
+  backendGetAllPayments,
+  backendGetAllTickets,
+  backendGetAllWithdrawals,
+  backendRejectPayment as backendRejectPaymentFn,
+  backendUpdateWithdrawal as backendUpdateWithdrawalFn,
+} from "../lib/backendStore";
 import {
   ADMIN_PIN,
   type FscUser,
@@ -525,16 +536,64 @@ function PaymentsTab({
   onRefresh: () => void;
 }) {
   const _ = refreshKey;
-  const payments = getAllPaymentsAdmin().sort((a, b) =>
+  const [backendPayments, setBackendPayments] = useState<AdminPayment[]>([]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey is intentional re-fetch trigger
+  useEffect(() => {
+    backendGetAllPayments()
+      .then(setBackendPayments)
+      .catch(() => {});
+  }, [refreshKey]);
+
+  // Merge: localStorage payments first, then backend-only payments not in localStorage
+  const localPayments = getAllPaymentsAdmin();
+  const localUtrSet = new Set(localPayments.map((p) => p.utr));
+  const backendOnlyPayments = backendPayments.filter(
+    (bp) => !localUtrSet.has(bp.utr),
+  );
+
+  // Convert backend-only payments to local format for display
+  const backendAsLocal: PaymentSubmission[] = backendOnlyPayments.map(
+    (bp) =>
+      ({
+        id: `backend_${bp.principalStr}_${bp.utr}`,
+        userId: bp.principalStr.slice(0, 8),
+        userName: `User (${bp.principalStr.slice(0, 8)}...)`,
+        amount: bp.amount,
+        method: bp.method,
+        utr: bp.utr,
+        screenshot: bp.screenshotBlobId,
+        status: bp.status,
+        date: new Date(Number(bp.timestamp / BigInt(1000000))).toLocaleString(
+          "en-IN",
+        ),
+        _principalStr: bp.principalStr,
+      }) as PaymentSubmission & { _principalStr: string },
+  );
+
+  const payments = [...localPayments, ...backendAsLocal].sort((a, b) =>
     a.date < b.date ? 1 : -1,
   );
 
   function handleApprove(id: string) {
     adminApprovePayment(id);
+    // Also sync to backend for backend-only payments
+    const p = payments.find((x) => x.id === id) as
+      | (PaymentSubmission & { _principalStr?: string })
+      | undefined;
+    if (p?._principalStr) {
+      backendApprovePaymentFn(p._principalStr, p.utr).catch(() => {});
+    }
     onRefresh();
   }
   function handleReject(id: string) {
     adminRejectPayment(id);
+    const p = payments.find((x) => x.id === id) as
+      | (PaymentSubmission & { _principalStr?: string })
+      | undefined;
+    if (p?._principalStr) {
+      backendRejectPaymentFn(p._principalStr, p.utr).catch(() => {});
+    }
     onRefresh();
   }
 
@@ -722,16 +781,66 @@ function WithdrawalsTab({
   onRefresh: () => void;
 }) {
   const _ = refreshKey;
-  const withdrawals = getAllWithdrawalsAdmin().sort((a, b) =>
+  const [backendWithdrawals, setBackendWithdrawals] = useState<
+    AdminWithdrawal[]
+  >([]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey is intentional re-fetch trigger
+  useEffect(() => {
+    backendGetAllWithdrawals()
+      .then(setBackendWithdrawals)
+      .catch(() => {});
+  }, [refreshKey]);
+
+  const localWithdrawals = getAllWithdrawalsAdmin();
+  // Convert backend-only withdrawals not in localStorage
+  const backendAsLocal: WithdrawalRequest[] = backendWithdrawals.map(
+    (bw) =>
+      ({
+        id: `backend_${bw.principalStr}_${bw.timestamp}`,
+        userId: bw.principalStr.slice(0, 8),
+        amount: bw.amount,
+        upiId: bw.address,
+        upiName: `User (${bw.principalStr.slice(0, 8)}...)`,
+        status: bw.status,
+        date: new Date(Number(bw.timestamp / BigInt(1000000))).toLocaleString(
+          "en-IN",
+        ),
+        _principalStr: bw.principalStr,
+        _timestamp: bw.timestamp,
+      }) as WithdrawalRequest & { _principalStr: string; _timestamp: bigint },
+  );
+
+  const withdrawals = [...localWithdrawals, ...backendAsLocal].sort((a, b) =>
     a.date < b.date ? 1 : -1,
   );
 
   function handleProcess(id: string) {
     adminUpdateWithdrawal(id, "approved");
+    const w = withdrawals.find((x) => x.id === id) as
+      | (WithdrawalRequest & { _principalStr?: string; _timestamp?: bigint })
+      | undefined;
+    if (w?._principalStr && w._timestamp !== undefined) {
+      backendUpdateWithdrawalFn(
+        w._principalStr,
+        w._timestamp,
+        "approved",
+      ).catch(() => {});
+    }
     onRefresh();
   }
   function handleReject(id: string) {
     adminUpdateWithdrawal(id, "rejected");
+    const w = withdrawals.find((x) => x.id === id) as
+      | (WithdrawalRequest & { _principalStr?: string; _timestamp?: bigint })
+      | undefined;
+    if (w?._principalStr && w._timestamp !== undefined) {
+      backendUpdateWithdrawalFn(
+        w._principalStr,
+        w._timestamp,
+        "rejected",
+      ).catch(() => {});
+    }
     onRefresh();
   }
 
@@ -851,7 +960,35 @@ function UsersTab({
   onRefresh: () => void;
 }) {
   const _ = refreshKey;
-  const users = getAllUsers();
+  const [backendPayments, setBackendPayments] = useState<AdminPayment[]>([]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey is intentional re-fetch trigger
+  useEffect(() => {
+    backendGetAllPayments()
+      .then(setBackendPayments)
+      .catch(() => {});
+  }, [refreshKey]);
+
+  const localUsers = getAllUsers();
+  // Add synthetic users for backend principals not already in localStorage
+  const localUniqueIds = new Set(localUsers.map((u) => u.uniqueId));
+  const backendOnlyPrincipals = new Set<string>();
+  for (const bp of backendPayments) {
+    if (!localUniqueIds.has(bp.principalStr.slice(0, 8))) {
+      backendOnlyPrincipals.add(bp.principalStr);
+    }
+  }
+  const syntheticUsers: FscUser[] = Array.from(backendOnlyPrincipals).map(
+    (p) =>
+      ({
+        name: "Cross-Device User",
+        phone: p.slice(0, 10),
+        uniqueId: p.slice(0, 8),
+        balance: 0,
+        _isSynthetic: true,
+      }) as FscUser & { _isSynthetic: boolean },
+  );
+  const users = [...localUsers, ...syntheticUsers];
   const [editBalanceId, setEditBalanceId] = useState<string | null>(null);
   const [balanceInput, setBalanceInput] = useState("");
   const [editUpiId, setEditUpiId] = useState<string | null>(null);
@@ -1193,7 +1330,33 @@ function TicketsTab({
   onRefresh: () => void;
 }) {
   const _ = refreshKey;
-  const tickets = getAllTicketsAdmin().sort((a, b) =>
+  const [backendTickets, setBackendTickets] = useState<AdminTicket[]>([]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey is intentional re-fetch trigger
+  useEffect(() => {
+    backendGetAllTickets()
+      .then(setBackendTickets)
+      .catch(() => {});
+  }, [refreshKey]);
+
+  const localTickets = getAllTicketsAdmin();
+  const localTicketIds = new Set(localTickets.map((t) => t.id));
+  const backendAsLocal: (SupportTicketLocal & {
+    userName: string;
+    userPhone: string;
+  })[] = backendTickets
+    .filter((bt) => !localTicketIds.has(String(bt.ticketId)))
+    .map((bt) => ({
+      id: String(bt.ticketId),
+      subject: bt.subject,
+      message: bt.message,
+      status: bt.status,
+      date: new Date(Number(bt.timestamp / BigInt(1000000))).toISOString(),
+      userId: bt.principalStr.slice(0, 8),
+      userName: `User (${bt.principalStr.slice(0, 8)}...)`,
+      userPhone: bt.principalStr.slice(0, 10),
+    }));
+  const tickets = [...localTickets, ...backendAsLocal].sort((a, b) =>
     a.date < b.date ? 1 : -1,
   );
 

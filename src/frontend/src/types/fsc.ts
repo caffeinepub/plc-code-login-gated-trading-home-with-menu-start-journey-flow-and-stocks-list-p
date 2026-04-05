@@ -1138,3 +1138,22 @@ export function isMaintenanceMode(): boolean {
 export function setMaintenanceMode(enabled: boolean): void {
   localStorage.setItem("fsc_maintenance_mode", enabled ? "true" : "false");
 }
+
+// ─── User Registry (for cross-device user discovery) ─────────────────────────
+
+export function getRegisteredPhones(): string[] {
+  try {
+    const raw = localStorage.getItem("fsc_user_registry");
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function registerUserGlobally(phone: string): void {
+  const existing = getRegisteredPhones();
+  if (!existing.includes(phone)) {
+    existing.push(phone);
+    localStorage.setItem("fsc_user_registry", JSON.stringify(existing));
+  }
+}

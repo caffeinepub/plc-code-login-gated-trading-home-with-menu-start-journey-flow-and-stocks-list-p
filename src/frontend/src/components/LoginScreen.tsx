@@ -1,7 +1,13 @@
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Smartphone, User } from "lucide-react";
 import { useState } from "react";
-import { type FscUser, isBlocked, saveUser } from "../types/fsc";
+import { backendRegisterUser } from "../lib/backendStore";
+import {
+  type FscUser,
+  isBlocked,
+  registerUserGlobally,
+  saveUser,
+} from "../types/fsc";
 
 interface LoginScreenProps {
   onLogin: () => void;
@@ -58,6 +64,7 @@ export default function LoginScreen({
           return;
         }
         saveUser(existing);
+        registerUserGlobally(cleaned);
         onLogin();
         return;
       } catch {
@@ -73,6 +80,9 @@ export default function LoginScreen({
       balance: 0,
     };
     saveUser(user);
+    registerUserGlobally(cleaned);
+    // Fire-and-forget backend registration
+    backendRegisterUser(user).catch(() => {});
     onLogin();
   }
 
