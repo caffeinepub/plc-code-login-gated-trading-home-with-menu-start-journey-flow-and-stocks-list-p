@@ -69,7 +69,7 @@ export default function App() {
   const [page, setPage] = useState<Page>("home");
   const [menuOpen, setMenuOpen] = useState(false);
   const [isFrozen, setIsFrozen] = useState(false);
-  const [isMaintenance, setIsMaintenance] = useState(false);
+  const [isMaintenance, setIsMaintenance] = useState(() => isMaintenanceMode());
 
   useEffect(() => {
     const theme = getTheme();
@@ -86,12 +86,16 @@ export default function App() {
         setIsFrozen(isUserFrozen(user.phone));
       }
       setIsMaintenance(isMaintenanceMode());
-    }, 5000);
+    }, 3000);
     return () => clearInterval(interval);
   }, [phase]);
 
   function handleSplashComplete() {
     const user = getCurrentUser();
+    setIsMaintenance(isMaintenanceMode());
+    if (user) {
+      setIsFrozen(isUserFrozen(user.phone));
+    }
     setPhase(user ? "app" : "login");
   }
 
@@ -101,6 +105,7 @@ export default function App() {
       recordLogin(user.uniqueId);
       setIsFrozen(isUserFrozen(user.phone));
     }
+    setIsMaintenance(isMaintenanceMode());
     setPhase("app");
     setPage("home");
   }
@@ -108,6 +113,7 @@ export default function App() {
   function handleLogout() {
     logoutUser();
     setIsFrozen(false);
+    setIsMaintenance(isMaintenanceMode());
     setPhase("login");
     setPage("home");
   }
