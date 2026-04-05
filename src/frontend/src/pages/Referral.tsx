@@ -1,11 +1,13 @@
-import { ArrowLeft, Copy, Users } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, CheckCircle2, Copy, Tag, Users } from "lucide-react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   type ReferralData,
   formatInr,
+  getAppliedReferralCode,
   getCurrentUser,
   getReferralData,
+  saveAppliedReferralCode,
   saveReferralData,
   saveUser,
 } from "../types/fsc";
@@ -30,6 +32,15 @@ export default function Referral({ onBack }: ReferralProps) {
   });
   const [codeCopied, setCodeCopied] = useState(false);
 
+  // Enter referral code state
+  const [appliedCode] = useState<string | null>(() =>
+    user ? getAppliedReferralCode(user.uniqueId) : null,
+  );
+  const [inputCode, setInputCode] = useState("");
+  const [refError, setRefError] = useState("");
+  const [refApplied, setRefApplied] = useState<string | null>(appliedCode);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   function handleCopyCode() {
     navigator.clipboard.writeText(data.referralCode).then(() => {
       setCodeCopied(true);
@@ -50,6 +61,33 @@ export default function Referral({ onBack }: ReferralProps) {
     );
   }
 
+  function handleApplyCode() {
+    if (!user) return;
+    const code = inputCode.trim().toUpperCase();
+    setRefError("");
+
+    // Validate format: FSC followed by exactly 8 digits
+    if (!/^FSC\d{8}$/.test(code)) {
+      setRefError("Invalid referral code format. Must be FSCXXXXXXXX");
+      return;
+    }
+    // Can't use own code
+    if (code === referralCode) {
+      setRefError("You can't use your own referral code");
+      return;
+    }
+
+    // Apply code and reward ₹50
+    saveAppliedReferralCode(user.uniqueId, code);
+    const freshUser = getCurrentUser();
+    if (freshUser) {
+      saveUser({ ...freshUser, balance: freshUser.balance + 50 });
+    }
+    setRefApplied(code);
+    setInputCode("");
+    toast.success("Referral code applied! ₹50 bonus added to your balance");
+  }
+
   function maskPhone(phone: string): string {
     if (phone.length < 4) return phone;
     return phone[0] + "X".repeat(phone.length - 4) + phone.slice(-3);
@@ -62,6 +100,7 @@ export default function Referral({ onBack }: ReferralProps) {
           <button
             type="button"
             onClick={onBack}
+            data-ocid="referral.back.button"
             style={{
               background: "transparent",
               border: "1px solid oklch(0.78 0.18 82 / 0.3)",
@@ -142,6 +181,7 @@ export default function Referral({ onBack }: ReferralProps) {
             onClick={handleCopyCode}
             className="btn-gold font-sans font-bold rounded-full px-6 py-2 text-sm"
             style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
+            data-ocid="referral.copy.button"
           >
             <Copy style={{ width: 14, height: 14 }} />
             {codeCopied ? "Copied!" : "Copy Code"}
@@ -154,6 +194,196 @@ export default function Referral({ onBack }: ReferralProps) {
             you both earn{" "}
             <strong style={{ color: "oklch(0.78 0.18 82)" }}>₹50 bonus</strong>.
           </p>
+        </div>
+
+        {/* Enter Referral Code Card */}
+        <div
+          data-ocid="referral.enter_code.card"
+          style={{
+            background: "oklch(0.13 0.03 265)",
+            border: refApplied
+              ? "1px solid oklch(0.65 0.20 145 / 0.45)"
+              : "1px solid oklch(0.65 0.22 220 / 0.35)",
+            borderRadius: 18,
+            padding: "22px 20px",
+            marginBottom: 20,
+            boxShadow: refApplied
+              ? "0 0 20px oklch(0.65 0.20 145 / 0.08)"
+              : "0 0 20px oklch(0.65 0.22 220 / 0.06)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              marginBottom: 14,
+            }}
+          >
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                background: refApplied
+                  ? "oklch(0.65 0.20 145 / 0.18)"
+                  : "oklch(0.65 0.22 220 / 0.18)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              {refApplied ? (
+                <CheckCircle2
+                  style={{
+                    width: 18,
+                    height: 18,
+                    color: "oklch(0.75 0.18 145)",
+                  }}
+                />
+              ) : (
+                <Tag
+                  style={{
+                    width: 18,
+                    height: 18,
+                    color: "oklch(0.70 0.20 220)",
+                  }}
+                />
+              )}
+            </div>
+            <div>
+              <p
+                className="font-display font-bold"
+                style={{
+                  fontSize: "0.95rem",
+                  color: refApplied
+                    ? "oklch(0.75 0.18 145)"
+                    : "oklch(0.88 0.01 80)",
+                }}
+              >
+                Enter a Referral Code
+              </p>
+              <p
+                className="font-sans"
+                style={{ fontSize: "0.7rem", color: "oklch(0.50 0.02 265)" }}
+              >
+                {refApplied
+                  ? "Bonus already applied to your account"
+                  : "Get ₹50 bonus when you use a friend's code"}
+              </p>
+            </div>
+          </div>
+
+          {refApplied ? (
+            <div
+              style={{
+                background: "oklch(0.65 0.20 145 / 0.10)",
+                border: "1px solid oklch(0.65 0.20 145 / 0.30)",
+                borderRadius: 10,
+                padding: "12px 16px",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+              }}
+              data-ocid="referral.applied.success_state"
+            >
+              <CheckCircle2
+                style={{
+                  width: 16,
+                  height: 16,
+                  color: "oklch(0.75 0.18 145)",
+                  flexShrink: 0,
+                }}
+              />
+              <div>
+                <p
+                  className="font-sans font-bold"
+                  style={{ fontSize: "0.82rem", color: "oklch(0.75 0.18 145)" }}
+                >
+                  Applied!
+                </p>
+                <p
+                  className="font-sans"
+                  style={{
+                    fontSize: "0.72rem",
+                    color: "oklch(0.55 0.02 265)",
+                    letterSpacing: "0.08em",
+                  }}
+                >
+                  {refApplied}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputCode}
+                  onChange={(e) => {
+                    setInputCode(e.target.value.toUpperCase());
+                    if (refError) setRefError("");
+                  }}
+                  placeholder="e.g. FSC12345678"
+                  maxLength={11}
+                  data-ocid="referral.code.input"
+                  style={{
+                    flex: 1,
+                    background: "oklch(0.09 0.02 265)",
+                    border: refError
+                      ? "1px solid oklch(0.65 0.22 22 / 0.6)"
+                      : "1px solid oklch(0.65 0.22 220 / 0.25)",
+                    borderRadius: 10,
+                    padding: "11px 14px",
+                    color: "oklch(0.90 0.01 80)",
+                    fontFamily: "Plus Jakarta Sans, sans-serif",
+                    fontSize: "0.9rem",
+                    outline: "none",
+                    letterSpacing: "0.08em",
+                    fontWeight: 700,
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleApplyCode}
+                  disabled={!inputCode.trim()}
+                  data-ocid="referral.apply_code.button"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, oklch(0.87 0.17 87), oklch(0.73 0.21 73))",
+                    color: "oklch(0.12 0.03 265)",
+                    fontWeight: 700,
+                    fontSize: "0.82rem",
+                    padding: "11px 18px",
+                    borderRadius: 10,
+                    border: "none",
+                    cursor: inputCode.trim() ? "pointer" : "not-allowed",
+                    opacity: inputCode.trim() ? 1 : 0.5,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Apply Code
+                </button>
+              </div>
+              {refError && (
+                <p
+                  style={{
+                    marginTop: 8,
+                    fontSize: "0.75rem",
+                    color: "oklch(0.72 0.2 22)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                  data-ocid="referral.code.error_state"
+                >
+                  {refError}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Referral Earnings Wallet */}
@@ -192,6 +422,7 @@ export default function Referral({ onBack }: ReferralProps) {
             onClick={handleTransfer}
             disabled={data.referralEarnings <= 0}
             className="btn-gold font-sans font-bold rounded-xl px-5 py-2 text-sm"
+            data-ocid="referral.transfer.button"
             style={{
               opacity: data.referralEarnings <= 0 ? 0.4 : 1,
               cursor: data.referralEarnings <= 0 ? "not-allowed" : "pointer",
@@ -218,6 +449,7 @@ export default function Referral({ onBack }: ReferralProps) {
                 padding: "32px 20px",
                 textAlign: "center",
               }}
+              data-ocid="referral.friends.empty_state"
             >
               <Users
                 style={{
@@ -233,10 +465,11 @@ export default function Referral({ onBack }: ReferralProps) {
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {data.referredFriends.map((friend) => (
+            <div className="space-y-3" data-ocid="referral.friends.list">
+              {data.referredFriends.map((friend, i) => (
                 <div
                   key={`${friend.phone}-${friend.joinedDate}`}
+                  data-ocid={`referral.friends.item.${i + 1}`}
                   style={{
                     background: "oklch(0.13 0.03 265)",
                     border: "1px solid oklch(0.78 0.18 82 / 0.12)",

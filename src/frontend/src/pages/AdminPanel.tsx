@@ -10,6 +10,8 @@ import {
   Headphones,
   Lock,
   LogOut,
+  MessageSquare,
+  Send,
   Shield,
   Users,
   Wallet,
@@ -33,6 +35,7 @@ import {
 } from "../lib/backendStore";
 import {
   ADMIN_PIN,
+  type Broadcast,
   type FscUser,
   type KycData,
   type PaymentSubmission,
@@ -54,9 +57,11 @@ import {
   getAllTicketsAdmin,
   getAllUsers,
   getAllWithdrawalsAdmin,
+  getBroadcasts,
   getVipTier,
   getVipTierLabel,
   isMaintenanceMode,
+  saveBroadcasts,
   setMaintenanceMode,
 } from "../types/fsc";
 
@@ -71,7 +76,8 @@ type AdminTab =
   | "users"
   | "tickets"
   | "kyc"
-  | "transactions";
+  | "transactions"
+  | "messages";
 
 const TABS: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: "dashboard", label: "Dashboard", icon: BarChart2 },
@@ -81,6 +87,7 @@ const TABS: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: "tickets", label: "Tickets", icon: Headphones },
   { id: "kyc", label: "KYC", icon: ClipboardList },
   { id: "transactions", label: "Transactions", icon: ArrowLeftRight },
+  { id: "messages", label: "Messages", icon: MessageSquare },
 ];
 
 const S = {
@@ -1431,12 +1438,52 @@ function TicketsTab({
               background: "oklch(0.09 0.02 265)",
               borderRadius: 8,
               padding: "8px 12px",
-              marginBottom: t.status === "open" ? 10 : 0,
+              marginBottom: 10,
               lineHeight: 1.5,
             }}
           >
             {t.message}
           </p>
+          {(t as SupportTicketLocal & { screenshotUrl?: string })
+            .screenshotUrl && (
+            <div style={{ marginBottom: 10 }}>
+              <p
+                style={{
+                  fontSize: "0.65rem",
+                  color: "oklch(0.45 0.02 265)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.1em",
+                  marginBottom: 6,
+                }}
+              >
+                Attachment
+              </p>
+              <a
+                href={
+                  (t as SupportTicketLocal & { screenshotUrl?: string })
+                    .screenshotUrl
+                }
+                target="_blank"
+                rel="noreferrer"
+              >
+                <img
+                  src={
+                    (t as SupportTicketLocal & { screenshotUrl?: string })
+                      .screenshotUrl
+                  }
+                  alt="Ticket attachment"
+                  style={{
+                    width: "100%",
+                    maxHeight: 180,
+                    objectFit: "contain",
+                    borderRadius: 8,
+                    border: "1px solid oklch(0.22 0.03 265)",
+                    background: "oklch(0.09 0.02 265)",
+                  }}
+                />
+              </a>
+            </div>
+          )}
           {t.status === "open" && (
             <button
               type="button"
@@ -1819,6 +1866,254 @@ function TransactionsTab({ refreshKey }: { refreshKey: number }) {
 }
 
 // ─── Main AdminPanel Component ────────────────────────────────────────────────
+
+// ─── Messages Tab ─────────────────────────────────────────────────────────────
+function MessagesTab() {
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [broadcasts, setBroadcasts] = useState<Broadcast[]>(() =>
+    getBroadcasts(),
+  );
+  const [sending, setSending] = useState(false);
+
+  function handleSend(e: React.FormEvent) {
+    e.preventDefault();
+    if (!title.trim() || !body.trim()) return;
+    setSending(true);
+    const newBroadcast: Broadcast = {
+      id: Date.now().toString(),
+      title: title.trim(),
+      message: body.trim(),
+      target: "all",
+      date: new Date().toISOString(),
+      read: [],
+    };
+    const updated = [newBroadcast, ...getBroadcasts()];
+    saveBroadcasts(updated);
+    setBroadcasts(updated);
+    setTitle("");
+    setBody("");
+    setSending(false);
+  }
+
+  function formatMsgDate(iso: string): string {
+    try {
+      return new Date(iso).toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return iso;
+    }
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Compose Form */}
+      <form
+        onSubmit={handleSend}
+        data-ocid="admin.messages.modal"
+        style={{
+          ...S.card,
+          border: "1px solid oklch(0.78 0.18 82 / 0.25)",
+          boxShadow: "0 0 20px oklch(0.78 0.18 82 / 0.06)",
+        }}
+      >
+        <p
+          style={{
+            fontSize: "0.9rem",
+            fontWeight: 700,
+            color: "oklch(0.88 0.01 80)",
+            marginBottom: 14,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <MessageSquare
+            style={{ width: 16, height: 16, color: "oklch(0.78 0.18 82)" }}
+          />
+          Compose Message
+        </p>
+        <div style={{ marginBottom: 10 }}>
+          <label
+            htmlFor="msg-title"
+            style={{
+              fontSize: "0.7rem",
+              color: "oklch(0.55 0.02 265)",
+              display: "block",
+              marginBottom: 6,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+            }}
+          >
+            Title
+          </label>
+          <input
+            id="msg-title"
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g. Special Offer — 5% Bonus This Weekend!"
+            required
+            data-ocid="admin.messages.title.input"
+            style={S.input}
+          />
+        </div>
+        <div style={{ marginBottom: 14 }}>
+          <label
+            htmlFor="msg-body"
+            style={{
+              fontSize: "0.7rem",
+              color: "oklch(0.55 0.02 265)",
+              display: "block",
+              marginBottom: 6,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+            }}
+          >
+            Message
+          </label>
+          <textarea
+            id="msg-body"
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder="Write your announcement or offer here..."
+            required
+            rows={4}
+            data-ocid="admin.messages.body.textarea"
+            style={{ ...S.input, resize: "none" as const, lineHeight: 1.6 }}
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={sending || !title.trim() || !body.trim()}
+          data-ocid="admin.messages.submit.button"
+          style={{
+            width: "100%",
+            background:
+              sending || !title.trim() || !body.trim()
+                ? "oklch(0.65 0.2 145 / 0.3)"
+                : "linear-gradient(135deg, oklch(0.87 0.17 87), oklch(0.73 0.21 73))",
+            color:
+              sending || !title.trim() || !body.trim()
+                ? "oklch(0.55 0.02 265)"
+                : "oklch(0.12 0.03 265)",
+            fontWeight: 700,
+            fontSize: "0.85rem",
+            padding: "11px",
+            borderRadius: 10,
+            border: "none",
+            cursor:
+              sending || !title.trim() || !body.trim()
+                ? "not-allowed"
+                : "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            transition: "all 0.15s ease",
+          }}
+        >
+          <Send style={{ width: 14, height: 14 }} />
+          {sending ? "Sending..." : "Send to All Users"}
+        </button>
+      </form>
+
+      {/* Sent Messages */}
+      <div>
+        <p
+          style={{
+            fontSize: "0.78rem",
+            fontWeight: 600,
+            color: "oklch(0.55 0.02 265)",
+            marginBottom: 10,
+            textTransform: "uppercase",
+            letterSpacing: "0.06em",
+          }}
+        >
+          Sent Messages ({broadcasts.length})
+        </p>
+        {broadcasts.length === 0 ? (
+          <EmptyState icon={MessageSquare} message="No messages sent yet" />
+        ) : (
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: 10 }}
+            data-ocid="admin.messages.list"
+          >
+            {broadcasts.map((b, i) => (
+              <div
+                key={b.id}
+                style={{
+                  ...S.card,
+                  borderLeft: "3px solid oklch(0.78 0.18 82 / 0.6)",
+                  position: "relative",
+                }}
+                data-ocid={`admin.messages.item.${i + 1}`}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    marginBottom: 6,
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: "0.88rem",
+                      fontWeight: 700,
+                      color: "oklch(0.90 0.01 80)",
+                      flex: 1,
+                      marginRight: 10,
+                    }}
+                  >
+                    {b.title}
+                  </p>
+                  <span
+                    style={{
+                      fontSize: "0.6rem",
+                      background: "oklch(0.65 0.2 145 / 0.12)",
+                      color: "oklch(0.75 0.18 145)",
+                      border: "1px solid oklch(0.65 0.2 145 / 0.3)",
+                      borderRadius: 999,
+                      padding: "2px 8px",
+                      fontWeight: 700,
+                      letterSpacing: "0.04em",
+                      whiteSpace: "nowrap",
+                      flexShrink: 0,
+                    }}
+                  >
+                    Sent to All Users
+                  </span>
+                </div>
+                <p
+                  style={{
+                    fontSize: "0.8rem",
+                    color: "oklch(0.60 0.02 265)",
+                    lineHeight: 1.55,
+                    marginBottom: 8,
+                  }}
+                >
+                  {b.message}
+                </p>
+                <p
+                  style={{ fontSize: "0.65rem", color: "oklch(0.40 0.02 265)" }}
+                >
+                  {formatMsgDate(b.date)}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPanel({ onBack }: AdminPanelProps) {
   const [authenticated, setAuthenticated] = useState(false);
   const [pin, setPin] = useState("");
@@ -2160,6 +2455,7 @@ export default function AdminPanel({ onBack }: AdminPanelProps) {
         {activeTab === "transactions" && (
           <TransactionsTab refreshKey={refreshKey} />
         )}
+        {activeTab === "messages" && <MessagesTab />}
       </main>
 
       {/* Footer */}

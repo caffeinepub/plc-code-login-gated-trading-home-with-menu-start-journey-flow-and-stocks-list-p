@@ -50,6 +50,7 @@ export interface SupportTicketLocal {
   status: "open" | "resolved";
   date: string;
   userId: string;
+  screenshotUrl?: string;
 }
 
 export type KycData = {
@@ -352,35 +353,38 @@ export function getVipTierLabel(tier: VipTier): string {
 
 export function getVipTierColor(tier: VipTier): string {
   const colors: Record<VipTier, string> = {
-    bronze: "oklch(0.62 0.12 55)",
-    silver: "oklch(0.72 0.04 265)",
-    gold: "oklch(0.78 0.18 82)",
-    platinum: "oklch(0.65 0.18 290)",
+    bronze: "oklch(0.70 0.14 50)",
+    silver: "oklch(0.75 0.03 265)",
+    gold: "oklch(0.80 0.18 82)",
+    platinum: "oklch(0.80 0.12 220)",
   };
   return colors[tier];
 }
 
-// ─── Active Plan ─────────────────────────────────────────────────────────────
+// ─── Active Plan ──────────────────────────────────────────────────────────────
+
+export const PLAN_DURATION_HOURS = 48;
+export const PLAN_HOURLY_RATE = 0.02; // 2% per hour
+export const PLAN_INSTANT_BONUS = 0.05; // 5% instant
+export const PLAN_TARGET_MULTIPLIER = 1.4; // 140%
 
 export interface ActivePlan {
-  id: string;
-  userId: string;
+  id?: string;
+  planId?: string;
+  userId?: string;
   planName: string;
   planAmount: number;
   purchaseDate: string;
   expiryDate: string;
-  status: "active" | "closed";
   earnedSoFar: number;
+  status: "active" | "closed";
   lastUpdated: string;
 }
-
-export const PLAN_HOURLY_RATE = 0.02;
-export const PLAN_TARGET_MULTIPLIER = 1.4;
 
 export function getActivePlan(userId: string): ActivePlan | null {
   try {
     const raw = localStorage.getItem(`fsc_active_plan_${userId}`);
-    return raw ? (JSON.parse(raw) as ActivePlan) : null;
+    return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
   }
@@ -394,7 +398,7 @@ export function clearActivePlan(userId: string): void {
   localStorage.removeItem(`fsc_active_plan_${userId}`);
 }
 
-export function tickPlanEarnings(plan: ActivePlan): ActivePlan {
+export function updatePlanEarnings(plan: ActivePlan): ActivePlan {
   if (plan.status === "closed") return plan;
   const now = new Date();
   const last = new Date(plan.lastUpdated);
@@ -412,6 +416,9 @@ export function tickPlanEarnings(plan: ActivePlan): ActivePlan {
     lastUpdated: now.toISOString(),
   };
 }
+
+// Alias for updatePlanEarnings (used in PlanDetails and Stocks pages)
+export const tickPlanEarnings = updatePlanEarnings;
 
 // ─── Admin Helpers ────────────────────────────────────────────────────────────
 
@@ -547,30 +554,28 @@ export function getAllKycAdmin(): Array<
       try {
         const raw = localStorage.getItem(key);
         if (raw) {
-          const data = JSON.parse(raw) as KycData;
+          const kycData = JSON.parse(raw) as KycData;
           let userName = userId;
           let userPhone = "";
-          const allUsersKeys: string[] = [];
           for (let j = 0; j < localStorage.length; j++) {
             const k2 = localStorage.key(j);
-            if (k2?.startsWith("fsc_user_")) allUsersKeys.push(k2);
-          }
-          for (const uk of allUsersKeys) {
-            const ur = localStorage.getItem(uk);
-            if (ur) {
-              try {
-                const u = JSON.parse(ur) as FscUser;
-                if (u.uniqueId === userId) {
-                  userName = u.name;
-                  userPhone = u.phone;
-                  break;
+            if (k2?.startsWith("fsc_user_")) {
+              const ur = localStorage.getItem(k2);
+              if (ur) {
+                try {
+                  const u = JSON.parse(ur) as FscUser;
+                  if (u.uniqueId === userId) {
+                    userName = u.name;
+                    userPhone = u.phone;
+                    break;
+                  }
+                } catch {
+                  // skip
                 }
-              } catch {
-                // skip
               }
             }
           }
-          result.push({ ...data, userId, userName, userPhone });
+          result.push({ ...kycData, userId, userName, userPhone });
         }
       } catch {
         // skip
@@ -926,17 +931,7 @@ export function saveCustomPlan(plan: CustomPlan): void {
   const existing = getCustomPlans();
   existing.push(plan);
   localStorage.setItem("fsc_custom_plans", JSON.stringify(existing));
-  adminLog(
-    "create_plan",
-    "system",
-    `Created custom plan: ${plan.name} at ${formatInr(plan.price)}`,
-  );
-}
-
-export function deleteCustomPlan(planId: string): void {
-  const existing = getCustomPlans().filter((p) => p.id !== planId);
-  localStorage.setItem("fsc_custom_plans", JSON.stringify(existing));
-  adminLog("delete_plan", "system", `Deleted custom plan ${planId}`);
+  adminLog("create_plan", "system", `Created custom plan: ${plan.name}`);
 }
 
 // ─── Feature 12: Broadcasts ───────────────────────────────────────────────────
@@ -983,16 +978,9 @@ export function sendAdminDm(userId: string, message: string): void {
     date: new Date().toISOString(),
     read: false,
   };
-  existing.push(dm);
+  existing.unshift(dm);
   localStorage.setItem(`fsc_dm_${userId}`, JSON.stringify(existing));
-  // Find user name for log
-  const users = getAllUsers();
-  const user = users.find((u) => u.uniqueId === userId);
-  adminLog(
-    "send_dm",
-    user?.name ?? userId,
-    `Sent message: ${message.slice(0, 50)}`,
-  );
+  adminLog("send_dm", userId, `Sent DM: ${message.slice(0, 40)}`);
 }
 
 export function markDmRead(userId: string, dmId: string): void {
@@ -1156,4 +1144,14 @@ export function registerUserGlobally(phone: string): void {
     existing.push(phone);
     localStorage.setItem("fsc_user_registry", JSON.stringify(existing));
   }
+}
+
+// ─── Referral Code Application ────────────────────────────────────────────────
+
+export function getAppliedReferralCode(userId: string): string | null {
+  return localStorage.getItem(`fsc_applied_ref_${userId}`);
+}
+
+export function saveAppliedReferralCode(userId: string, code: string): void {
+  localStorage.setItem(`fsc_applied_ref_${userId}`, code);
 }
