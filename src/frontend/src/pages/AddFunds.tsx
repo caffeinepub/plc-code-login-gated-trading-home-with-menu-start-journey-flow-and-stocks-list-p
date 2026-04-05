@@ -75,6 +75,16 @@ const PAYMENT_METHODS = [
   },
 ];
 
+/** Build a UPI deep link with the amount pre-filled */
+function buildUpiLink(amount: number): string {
+  return `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent("FSC Funds")}`;
+}
+
+/** Return a QR code image URL for the given UPI link (200px) */
+function getQrImageUrl(upiLink: string): string {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiLink)}`;
+}
+
 interface AddFundsProps {
   initialAmount?: number | null;
   onBack: () => void;
@@ -378,7 +388,7 @@ export default function AddFunds({ initialAmount, onBack }: AddFundsProps) {
           </div>
         )}
 
-        {step === "method" && (
+        {step === "method" && selectedAmount !== null && (
           <div>
             <h2
               className="font-display font-bold text-foreground mb-1"
@@ -389,7 +399,7 @@ export default function AddFunds({ initialAmount, onBack }: AddFundsProps) {
             <p className="font-sans text-muted-foreground text-sm mb-1">
               Paying:{" "}
               <span className="text-primary font-bold">
-                ₹{selectedAmount?.toLocaleString("en-IN")}
+                ₹{selectedAmount.toLocaleString("en-IN")}
               </span>
             </p>
             <p className="font-sans text-muted-foreground text-xs mb-6">
@@ -419,7 +429,7 @@ export default function AddFunds({ initialAmount, onBack }: AddFundsProps) {
                 Pay via UPI
               </p>
 
-              {/* QR Code section */}
+              {/* Dynamic QR Code section — amount pre-filled */}
               <div
                 style={{
                   display: "flex",
@@ -447,29 +457,67 @@ export default function AddFunds({ initialAmount, onBack }: AddFundsProps) {
                     boxShadow:
                       "0 0 20px oklch(0.78 0.18 82 / 0.15), 0 0 0 1px oklch(0.78 0.18 82 / 0.2)",
                     display: "inline-block",
+                    position: "relative",
                   }}
                 >
                   <img
-                    src="/assets/generated/upi-qr-code-transparent.dim_400x400.png"
-                    alt="UPI QR Code - Scan to pay"
+                    src={getQrImageUrl(buildUpiLink(selectedAmount))}
+                    alt={`UPI QR Code - Scan to pay ₹${selectedAmount.toLocaleString("en-IN")}`}
                     style={{
-                      width: 160,
-                      height: 160,
+                      width: 200,
+                      height: 200,
                       display: "block",
                       borderRadius: 4,
                     }}
                   />
+                </div>
+                {/* Amount badge below QR */}
+                <div
+                  style={{
+                    marginTop: 10,
+                    background: "oklch(0.78 0.18 82 / 0.12)",
+                    border: "1px solid oklch(0.78 0.18 82 / 0.35)",
+                    borderRadius: 8,
+                    padding: "5px 14px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "0.65rem",
+                      color: "oklch(0.60 0.04 265)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    Amount pre-filled:
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "0.85rem",
+                      fontWeight: 700,
+                      background:
+                        "linear-gradient(135deg, oklch(0.90 0.18 82), oklch(0.72 0.20 75))",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                    }}
+                  >
+                    ₹{selectedAmount.toLocaleString("en-IN")}
+                  </span>
                 </div>
                 <p
                   className="font-sans"
                   style={{
                     fontSize: "0.65rem",
                     color: "oklch(0.50 0.02 265)",
-                    marginTop: 8,
+                    marginTop: 6,
                     textAlign: "center",
                   }}
                 >
-                  Open any UPI app &amp; scan this code
+                  Open any UPI app &amp; scan — amount is already set
                 </p>
               </div>
 
@@ -616,7 +664,8 @@ export default function AddFunds({ initialAmount, onBack }: AddFundsProps) {
                 lineHeight: 1.5,
               }}
             >
-              Or scan the QR code above to pay directly from any UPI app
+              Scan the QR code above — ₹{selectedAmount.toLocaleString("en-IN")}{" "}
+              is already pre-filled
             </p>
           </div>
         )}
