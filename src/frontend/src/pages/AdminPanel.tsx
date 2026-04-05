@@ -29,6 +29,8 @@ import {
   adminCloseTicket,
   adminRejectKyc,
   adminRejectPayment,
+  adminSuspendUser,
+  adminUnsuspendUser,
   adminUpdateUpi,
   adminUpdateWithdrawal,
   formatInr,
@@ -820,6 +822,26 @@ function UsersTab({
                   }}
                 >
                   {u.name}
+                  {u.suspended && (
+                    <span
+                      style={{
+                        display: "inline-block",
+                        marginLeft: 8,
+                        padding: "2px 7px",
+                        borderRadius: 999,
+                        fontSize: "0.6rem",
+                        fontWeight: 800,
+                        background: "oklch(0.35 0.18 25)",
+                        color: "oklch(0.95 0.02 25)",
+                        border: "1px solid oklch(0.55 0.22 25)",
+                        letterSpacing: "0.06em",
+                        verticalAlign: "middle",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      FROZEN
+                    </span>
+                  )}
                 </p>
                 <p
                   style={{
@@ -1004,6 +1026,48 @@ function UsersTab({
                 )}
                 UPI
               </button>
+              {u.suspended ? (
+                <button
+                  type="button"
+                  style={{
+                    ...S.btnGreen,
+                    flex: 1,
+                  }}
+                  onClick={() => {
+                    adminUnsuspendUser(u.phone);
+                    onRefresh();
+                  }}
+                  data-ocid={`admin.users.toggle.${i + 1}`}
+                >
+                  ✓ Unfreeze
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  style={{
+                    flex: 1,
+                    background: "oklch(0.20 0.05 220)",
+                    border: "1px solid oklch(0.35 0.08 220)",
+                    color: "oklch(0.70 0.12 220)",
+                    fontWeight: 700,
+                    fontSize: "0.8rem",
+                    padding: "7px 10px",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 4,
+                  }}
+                  onClick={() => {
+                    adminSuspendUser(u.phone, "Frozen by admin");
+                    onRefresh();
+                  }}
+                  data-ocid={`admin.users.toggle.${i + 1}`}
+                >
+                  ❄ Freeze
+                </button>
+              )}
             </div>
           </div>
         );

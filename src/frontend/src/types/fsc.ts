@@ -749,6 +749,17 @@ export function adminUnsuspendUser(phone: string): void {
   }
 }
 
+export function isUserFrozen(phone: string): boolean {
+  try {
+    const raw = localStorage.getItem(`fsc_user_${phone}`);
+    if (!raw) return false;
+    const user = JSON.parse(raw) as FscUser;
+    return user.suspended === true;
+  } catch {
+    return false;
+  }
+}
+
 // ─── Feature 6: User Activity ────────────────────────────────────────────────
 
 export function getUserActivity(userId: string): UserActivity {

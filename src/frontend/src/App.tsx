@@ -29,6 +29,7 @@ import WithdrawalHistory from "./pages/WithdrawalHistory";
 import {
   getCurrentUser,
   getTheme,
+  isUserFrozen,
   logoutUser,
   recordLogin,
   recordUserActivity,
@@ -66,12 +67,25 @@ export default function App() {
   const [phase, setPhase] = useState<AppPhase>("splash");
   const [page, setPage] = useState<Page>("home");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isFrozen, setIsFrozen] = useState(false);
 
   useEffect(() => {
     const theme = getTheme();
     document.documentElement.classList.remove("dark", "light");
     document.documentElement.classList.add(theme);
   }, []);
+
+  // Poll freeze status every 10 seconds while in app
+  useEffect(() => {
+    if (phase !== "app") return;
+    const interval = setInterval(() => {
+      const user = getCurrentUser();
+      if (user) {
+        setIsFrozen(isUserFrozen(user.phone));
+      }
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [phase]);
 
   function handleSplashComplete() {
     const user = getCurrentUser();
@@ -80,13 +94,17 @@ export default function App() {
 
   function handleLogin() {
     const user = getCurrentUser();
-    if (user) recordLogin(user.uniqueId);
+    if (user) {
+      recordLogin(user.uniqueId);
+      setIsFrozen(isUserFrozen(user.phone));
+    }
     setPhase("app");
     setPage("home");
   }
 
   function handleLogout() {
     logoutUser();
+    setIsFrozen(false);
     setPhase("login");
     setPage("home");
   }
@@ -103,8 +121,13 @@ export default function App() {
 
   const showBottomNav =
     phase === "app" &&
+    !isFrozen &&
     page !== "admin-panel" &&
     (BOTTOM_NAV_PAGES.includes(page) || page === "home");
+
+  // Frozen screen — shown when user is frozen and not on admin panel
+  const showFrozenScreen =
+    phase === "app" && isFrozen && page !== "admin-panel";
 
   return (
     <ThemeProvider
@@ -124,7 +147,104 @@ export default function App() {
           }}
         />
       )}
-      {phase === "app" && (
+      {phase === "app" && showFrozenScreen && (
+        <div
+          style={{
+            minHeight: "100vh",
+            background: "oklch(0.08 0.02 265)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "24px",
+            textAlign: "center",
+          }}
+          data-ocid="frozen.page"
+        >
+          {/* Lock icon */}
+          <div
+            style={{
+              width: 96,
+              height: 96,
+              borderRadius: "50%",
+              background: "oklch(0.20 0.08 25)",
+              border: "2px solid oklch(0.45 0.18 25)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 28,
+              boxShadow: "0 0 40px oklch(0.45 0.18 25 / 0.4)",
+            }}
+          >
+            <span style={{ fontSize: 44 }}>🔒</span>
+          </div>
+
+          {/* Title */}
+          <h1
+            style={{
+              fontSize: "1.8rem",
+              fontWeight: 800,
+              background:
+                "linear-gradient(135deg, oklch(0.72 0.22 25), oklch(0.65 0.20 45))",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              marginBottom: 14,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            Account Frozen
+          </h1>
+
+          {/* Subtitle */}
+          <p
+            style={{
+              fontSize: "0.95rem",
+              color: "oklch(0.55 0.04 265)",
+              lineHeight: 1.6,
+              maxWidth: 320,
+              marginBottom: 36,
+            }}
+          >
+            Your account has been temporarily frozen by the admin. Please
+            contact support to resolve this issue.
+          </p>
+
+          {/* Divider */}
+          <div
+            style={{
+              width: 48,
+              height: 2,
+              background:
+                "linear-gradient(90deg, transparent, oklch(0.45 0.18 25), transparent)",
+              marginBottom: 36,
+            }}
+          />
+
+          {/* Sign Out button */}
+          <button
+            type="button"
+            onClick={handleLogout}
+            data-ocid="frozen.primary_button"
+            style={{
+              background:
+                "linear-gradient(135deg, oklch(0.75 0.18 82), oklch(0.65 0.20 75))",
+              color: "oklch(0.10 0.02 265)",
+              border: "none",
+              borderRadius: 12,
+              padding: "14px 36px",
+              fontSize: "1rem",
+              fontWeight: 800,
+              cursor: "pointer",
+              letterSpacing: "0.04em",
+              boxShadow: "0 4px 20px oklch(0.75 0.18 82 / 0.35)",
+            }}
+          >
+            Sign Out
+          </button>
+        </div>
+      )}
+      {phase === "app" && !showFrozenScreen && (
         <div className="relative">
           {page === "home" && (
             <Home
