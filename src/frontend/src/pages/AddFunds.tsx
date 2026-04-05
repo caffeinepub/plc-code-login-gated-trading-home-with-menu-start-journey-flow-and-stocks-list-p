@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, CheckCircle, Upload } from "lucide-react";
+import { ArrowLeft, CheckCircle, Copy, Upload } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useMarketTicker } from "../hooks/useMarketTicker";
@@ -33,10 +33,8 @@ const STOCK_PLANS = [
   { amount: 19999, name: "Royal Plan", desc: "Highest tier" },
 ];
 
-const BANK_ACCOUNT = "44203021218";
-const BANK_IFSC = "SBIN0001478";
-const BANK_NAME = "IKHLAS HAMID";
-const UPI_VPA = "44203021218@sbi";
+const UPI_ID = "collect.dfgateway@ptyes";
+const UPI_NAME = "FSC Gateway";
 
 const PAYMENT_METHODS = [
   {
@@ -46,7 +44,7 @@ const PAYMENT_METHODS = [
     bg: "oklch(0.40 0.15 250 / 0.15)",
     border: "oklch(0.55 0.20 250 / 0.4)",
     scheme: (amount: number) =>
-      `upi://pay?pa=${UPI_VPA}&pn=${encodeURIComponent(BANK_NAME)}&am=${amount}&cu=INR&tn=FSCFunds`,
+      `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount}&cu=INR&tn=FSCFunds`,
   },
   {
     id: "phonepe",
@@ -55,7 +53,7 @@ const PAYMENT_METHODS = [
     bg: "oklch(0.35 0.15 300 / 0.15)",
     border: "oklch(0.50 0.20 300 / 0.4)",
     scheme: (amount: number) =>
-      `phonepe://pay?pa=${UPI_VPA}&pn=${encodeURIComponent(BANK_NAME)}&am=${amount}&cu=INR`,
+      `phonepe://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount}&cu=INR`,
   },
   {
     id: "paytm",
@@ -64,7 +62,7 @@ const PAYMENT_METHODS = [
     bg: "oklch(0.55 0.15 215 / 0.15)",
     border: "oklch(0.65 0.18 215 / 0.4)",
     scheme: (amount: number) =>
-      `paytmmp://pay?pa=${UPI_VPA}&pn=${encodeURIComponent(BANK_NAME)}&am=${amount}&cu=INR`,
+      `paytmmp://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount}&cu=INR`,
   },
   {
     id: "upi",
@@ -73,7 +71,7 @@ const PAYMENT_METHODS = [
     bg: "oklch(0.55 0.18 55 / 0.15)",
     border: "oklch(0.65 0.20 55 / 0.4)",
     scheme: (amount: number) =>
-      `upi://pay?pa=${UPI_VPA}&pn=${encodeURIComponent(BANK_NAME)}&am=${amount}&cu=INR&tn=FSCFunds`,
+      `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount}&cu=INR&tn=FSCFunds`,
   },
 ];
 
@@ -96,6 +94,7 @@ export default function AddFunds({ initialAmount, onBack }: AddFundsProps) {
   const [screenshotName, setScreenshotName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [upiCopied, setUpiCopied] = useState(false);
 
   // initialAmount is kept for API compatibility but no longer skips to method step
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
@@ -111,6 +110,14 @@ export default function AddFunds({ initialAmount, onBack }: AddFundsProps) {
     const deepLink = method.scheme(selectedAmount!);
     window.location.href = deepLink;
     setTimeout(() => setStep("verify"), 1500);
+  }
+
+  function handleCopyUpi() {
+    navigator.clipboard.writeText(UPI_ID).then(() => {
+      setUpiCopied(true);
+      toast.success("UPI ID copied!");
+      setTimeout(() => setUpiCopied(false), 2000);
+    });
   }
 
   function handleScreenshotChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -389,10 +396,11 @@ export default function AddFunds({ initialAmount, onBack }: AddFundsProps) {
               Amount will be pre-filled in the payment app
             </p>
 
+            {/* UPI ID card */}
             <div
               style={{
                 background: "oklch(0.13 0.025 265)",
-                border: "1px solid oklch(0.78 0.18 82 / 0.2)",
+                border: "1px solid oklch(0.78 0.18 82 / 0.3)",
                 borderRadius: 14,
                 padding: "16px",
                 marginBottom: 24,
@@ -408,29 +416,58 @@ export default function AddFunds({ initialAmount, onBack }: AddFundsProps) {
                   letterSpacing: "0.1em",
                 }}
               >
-                Bank Details
+                Pay via UPI
               </p>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <p
+                  className="font-sans font-bold"
+                  style={{
+                    fontSize: "0.95rem",
+                    color: "oklch(0.90 0.18 82)",
+                    flex: 1,
+                    wordBreak: "break-all",
+                  }}
+                >
+                  {UPI_ID}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleCopyUpi}
+                  title="Copy UPI ID"
+                  style={{
+                    background: upiCopied
+                      ? "oklch(0.65 0.20 145 / 0.2)"
+                      : "oklch(0.78 0.18 82 / 0.15)",
+                    border: `1px solid ${
+                      upiCopied
+                        ? "oklch(0.65 0.20 145 / 0.5)"
+                        : "oklch(0.78 0.18 82 / 0.4)"
+                    }`,
+                    borderRadius: 8,
+                    padding: "6px 10px",
+                    cursor: "pointer",
+                    color: upiCopied ? "#22c55e" : "oklch(0.78 0.18 82)",
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  <Copy style={{ width: 12, height: 12 }} />
+                  {upiCopied ? "Copied!" : "Copy"}
+                </button>
+              </div>
               <p
-                className="font-sans font-semibold"
+                className="font-sans"
                 style={{
-                  fontSize: "0.85rem",
-                  color: "oklch(0.85 0.01 80)",
-                  marginBottom: 2,
+                  fontSize: "0.7rem",
+                  color: "oklch(0.50 0.02 265)",
+                  marginTop: 6,
                 }}
               >
-                {BANK_NAME}
-              </p>
-              <p
-                className="font-sans"
-                style={{ fontSize: "0.8rem", color: "oklch(0.65 0.02 265)" }}
-              >
-                Account: {BANK_ACCOUNT}
-              </p>
-              <p
-                className="font-sans"
-                style={{ fontSize: "0.8rem", color: "oklch(0.65 0.02 265)" }}
-              >
-                IFSC: {BANK_IFSC}
+                Or use a UPI app below to pay directly
               </p>
             </div>
 
@@ -548,13 +585,13 @@ export default function AddFunds({ initialAmount, onBack }: AddFundsProps) {
                     letterSpacing: "0.1em",
                   }}
                 >
-                  Account
+                  UPI ID
                 </p>
                 <p
                   className="font-sans font-semibold"
                   style={{ fontSize: "0.8rem", color: "oklch(0.85 0.01 80)" }}
                 >
-                  {BANK_ACCOUNT}
+                  {UPI_ID}
                 </p>
               </div>
             </div>
