@@ -411,13 +411,104 @@ export default function AddFunds({ initialAmount, onBack }: AddFundsProps) {
                 style={{
                   fontSize: "0.7rem",
                   color: "oklch(0.55 0.02 265)",
-                  marginBottom: 8,
+                  marginBottom: 12,
                   textTransform: "uppercase",
                   letterSpacing: "0.1em",
                 }}
               >
                 Pay via UPI
               </p>
+
+              {/* QR Code section */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  marginBottom: 16,
+                }}
+              >
+                <p
+                  className="font-sans"
+                  style={{
+                    fontSize: "0.7rem",
+                    color: "oklch(0.60 0.04 265)",
+                    marginBottom: 10,
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  Scan to Pay
+                </p>
+                <div
+                  style={{
+                    background: "#ffffff",
+                    borderRadius: 12,
+                    padding: 10,
+                    boxShadow:
+                      "0 0 20px oklch(0.78 0.18 82 / 0.15), 0 0 0 1px oklch(0.78 0.18 82 / 0.2)",
+                    display: "inline-block",
+                  }}
+                >
+                  <img
+                    src="/assets/generated/upi-qr-code-transparent.dim_400x400.png"
+                    alt="UPI QR Code - Scan to pay"
+                    style={{
+                      width: 160,
+                      height: 160,
+                      display: "block",
+                      borderRadius: 4,
+                    }}
+                  />
+                </div>
+                <p
+                  className="font-sans"
+                  style={{
+                    fontSize: "0.65rem",
+                    color: "oklch(0.50 0.02 265)",
+                    marginTop: 8,
+                    textAlign: "center",
+                  }}
+                >
+                  Open any UPI app &amp; scan this code
+                </p>
+              </div>
+
+              {/* Divider */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  marginBottom: 12,
+                }}
+              >
+                <div
+                  style={{
+                    flex: 1,
+                    height: 1,
+                    background: "oklch(0.78 0.18 82 / 0.15)",
+                  }}
+                />
+                <p
+                  className="font-sans"
+                  style={{
+                    fontSize: "0.65rem",
+                    color: "oklch(0.48 0.02 265)",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  or pay manually
+                </p>
+                <div
+                  style={{
+                    flex: 1,
+                    height: 1,
+                    background: "oklch(0.78 0.18 82 / 0.15)",
+                  }}
+                />
+              </div>
+
+              {/* UPI ID row */}
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <p
                   className="font-sans font-bold"
@@ -513,6 +604,20 @@ export default function AddFunds({ initialAmount, onBack }: AddFundsProps) {
                 </button>
               ))}
             </div>
+
+            {/* Note below payment methods */}
+            <p
+              className="font-sans"
+              style={{
+                fontSize: "0.7rem",
+                color: "oklch(0.50 0.02 265)",
+                marginTop: 14,
+                textAlign: "center",
+                lineHeight: 1.5,
+              }}
+            >
+              Or scan the QR code above to pay directly from any UPI app
+            </p>
           </div>
         )}
 
