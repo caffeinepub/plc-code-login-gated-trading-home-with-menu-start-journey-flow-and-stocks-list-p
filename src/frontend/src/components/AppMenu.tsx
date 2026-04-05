@@ -23,6 +23,7 @@ import {
   Moon,
   Settings2,
   Shield,
+  ShieldCheck,
   Star,
   Sun,
   TrendingUp,
@@ -194,14 +195,19 @@ export default function AppMenu({
     (completionSteps.filter(Boolean).length / completionSteps.length) * 100,
   );
 
+  // Multi-letter initials: first letter of each name word, max 2
   const initials = user?.name
     ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
+        .trim()
+        .split(/\s+/)
+        .map((n) => n[0]?.toUpperCase() ?? "")
+        .filter(Boolean)
         .slice(0, 2)
-        .toUpperCase()
+        .join("")
     : "?";
+
+  // Avatar size increased to 64px for better clarity
+  const AVATAR_SIZE = 64;
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -240,11 +246,11 @@ export default function AppMenu({
 
           <div className="flex items-start gap-3 mb-4">
             <div className="relative" style={{ flexShrink: 0 }}>
-              {/* Blue gradient border for avatar */}
+              {/* Blue gradient border for avatar — 3px padding for clarity */}
               <button
                 type="button"
                 style={{
-                  padding: 2,
+                  padding: 3,
                   borderRadius: "50%",
                   background:
                     "linear-gradient(135deg, oklch(0.65 0.22 220), oklch(0.72 0.18 195))",
@@ -256,8 +262,8 @@ export default function AppMenu({
               >
                 <div
                   style={{
-                    width: 56,
-                    height: 56,
+                    width: AVATAR_SIZE,
+                    height: AVATAR_SIZE,
                     borderRadius: "50%",
                     overflow: "hidden",
                     background: "oklch(0.13 0.05 240)",
@@ -280,12 +286,13 @@ export default function AppMenu({
                   ) : (
                     <span
                       style={{
-                        fontSize: "1.3rem",
+                        fontSize: "1.45rem",
                         fontWeight: 800,
                         color: "white",
                         fontFamily: "'Playfair Display', Georgia, serif",
                         lineHeight: 1,
                         userSelect: "none",
+                        letterSpacing: "0.02em",
                       }}
                     >
                       {initials}
@@ -293,22 +300,23 @@ export default function AppMenu({
                   )}
                 </div>
               </button>
-              {/* Tier badge */}
+              {/* Tier badge — larger and more readable */}
               <span
                 style={{
                   position: "absolute",
-                  bottom: -2,
-                  right: -4,
+                  bottom: -3,
+                  right: -6,
                   background: tierColor,
-                  color: "oklch(0.08 0.02 240)",
-                  fontSize: "0.58rem",
+                  color: "oklch(0.06 0.02 240)",
+                  fontSize: "0.65rem",
                   fontWeight: 800,
-                  padding: "2px 6px",
+                  padding: "3px 8px",
                   borderRadius: 999,
-                  boxShadow: `0 0 8px ${tierColor}80`,
-                  border: "1.5px solid oklch(0.08 0.04 240)",
+                  boxShadow: `0 0 10px ${tierColor}99`,
+                  border: "2px solid oklch(0.08 0.04 240)",
                   whiteSpace: "nowrap",
                   zIndex: 2,
+                  letterSpacing: "0.03em",
                 }}
               >
                 {tierLabel}
@@ -318,7 +326,7 @@ export default function AppMenu({
               className="flex-1 pt-1"
               style={{ minWidth: 0, overflow: "hidden" }}
             >
-              {/* Name */}
+              {/* Name — solid visible text */}
               <p
                 style={{
                   fontSize: "1rem",
@@ -327,7 +335,7 @@ export default function AppMenu({
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
-                  maxWidth: "140px",
+                  maxWidth: "148px",
                   marginBottom: 2,
                 }}
               >
@@ -365,13 +373,25 @@ export default function AppMenu({
                   })}
                 </p>
               )}
+              {/* KYC badge — larger, with background, clearly visible */}
               {kycData?.status === "verified" && (
                 <span
-                  className="inline-flex items-center gap-1 text-xs mt-0.5"
-                  style={{ color: "oklch(0.68 0.18 145)" }}
+                  className="inline-flex items-center gap-1 mt-1.5"
+                  style={{
+                    background: "oklch(0.25 0.08 145)",
+                    color: "oklch(0.80 0.18 145)",
+                    fontSize: "0.72rem",
+                    fontWeight: 700,
+                    padding: "2px 7px",
+                    borderRadius: 999,
+                    border: "1px solid oklch(0.40 0.14 145 / 0.5)",
+                    letterSpacing: "0.02em",
+                  }}
                 >
-                  <CheckCircle2 style={{ width: 10, height: 10 }} /> KYC
-                  Verified
+                  <ShieldCheck
+                    style={{ width: 13, height: 13, flexShrink: 0 }}
+                  />
+                  KYC Verified
                 </span>
               )}
             </div>

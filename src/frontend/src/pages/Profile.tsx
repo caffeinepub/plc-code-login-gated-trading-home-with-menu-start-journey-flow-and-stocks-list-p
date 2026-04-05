@@ -1,8 +1,13 @@
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Camera, Copy } from "lucide-react";
+import { ArrowLeft, Camera, Copy, ShieldCheck } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { type FscUser, getCurrentUser, saveUser } from "../types/fsc";
+import {
+  type FscUser,
+  getCurrentUser,
+  getKycData,
+  saveUser,
+} from "../types/fsc";
 
 interface ProfileProps {
   onBack: () => void;
@@ -12,6 +17,8 @@ export default function Profile({ onBack }: ProfileProps) {
   const [user, setUser] = useState<FscUser | null>(() => getCurrentUser());
   const [idCopied, setIdCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const kycData = user ? getKycData(user.uniqueId) : null;
 
   function handleProfilePicChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -36,7 +43,16 @@ export default function Profile({ onBack }: ProfileProps) {
     });
   }
 
-  const initial = user?.name?.[0]?.toUpperCase() ?? "U";
+  // Multi-letter initials: first letter of each word, max 2
+  const initials = user?.name
+    ? user.name
+        .trim()
+        .split(/\s+/)
+        .map((n) => n[0]?.toUpperCase() ?? "")
+        .filter(Boolean)
+        .slice(0, 2)
+        .join("")
+    : "U";
 
   return (
     <div className="min-h-screen bg-background bg-grid-pattern">
@@ -106,15 +122,16 @@ export default function Profile({ onBack }: ProfileProps) {
                 ) : (
                   <span
                     style={{
-                      fontSize: "2.5rem",
+                      fontSize: "2.2rem",
                       fontFamily: "'Playfair Display', Georgia, serif",
                       fontWeight: 800,
                       color: "white",
                       lineHeight: 1,
                       userSelect: "none",
+                      letterSpacing: "0.02em",
                     }}
                   >
-                    {initial}
+                    {initials}
                   </span>
                 )}
               </div>
@@ -150,24 +167,49 @@ export default function Profile({ onBack }: ProfileProps) {
             style={{ display: "none" }}
             onChange={handleProfilePicChange}
           />
-          {/* Name display */}
+
+          {/* Name display — solid visible text, no transparent gradient fill */}
           {user?.name && (
             <p
-              className="font-display font-bold mt-3"
+              className="font-display font-bold mt-4"
               style={{
-                fontSize: "1.2rem",
-                background:
-                  "linear-gradient(135deg, oklch(0.88 0.12 198), oklch(0.72 0.20 215))",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
+                fontSize: "1.3rem",
+                color: "oklch(0.96 0.008 200)",
+                letterSpacing: "0.01em",
+                lineHeight: 1.2,
               }}
             >
               {user.name}
             </p>
           )}
+
+          {/* KYC Verified badge */}
+          {kycData?.status === "verified" && (
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                marginTop: 10,
+                background: "oklch(0.35 0.15 145)",
+                color: "white",
+                fontSize: "0.8rem",
+                fontWeight: 700,
+                padding: "5px 12px",
+                borderRadius: 999,
+                letterSpacing: "0.02em",
+                boxShadow: "0 2px 12px oklch(0.35 0.15 145 / 0.45)",
+                border: "1px solid oklch(0.50 0.18 145 / 0.5)",
+              }}
+              data-ocid="profile.kyc.success_state"
+            >
+              <ShieldCheck style={{ width: 14, height: 14, flexShrink: 0 }} />
+              KYC Verified
+            </div>
+          )}
+
           <p
-            className="font-sans text-sm mt-1"
+            className="font-sans text-sm mt-2"
             style={{ color: "oklch(0.45 0.06 220)" }}
           >
             Tap the camera icon to change photo
