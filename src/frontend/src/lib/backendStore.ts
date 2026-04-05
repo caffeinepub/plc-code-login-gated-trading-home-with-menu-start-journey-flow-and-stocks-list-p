@@ -61,9 +61,20 @@ function mapTicketStatus(status: TicketStatus | string): "open" | "resolved" {
   return String(status) === TicketStatus.closed ? "resolved" : "open";
 }
 
+export async function ensureUserRole(): Promise<void> {
+  try {
+    const backend = await getBackend();
+    await backend._initializeAccessControlWithSecret("");
+  } catch {
+    // Role may already be assigned — ignore
+  }
+}
+
 export async function backendRegisterUser(user: FscUser): Promise<void> {
   try {
     const backend = await getBackend();
+    // Must initialize role first so backend calls don't trap
+    await ensureUserRole();
     await backend.saveCallerUserProfile({
       name: user.name,
       referralCode: `FSC${user.uniqueId}`,
@@ -80,6 +91,7 @@ export async function backendSubmitPayment(
 ): Promise<void> {
   try {
     const backend = await getBackend();
+    await ensureUserRole();
     await backend.submitPayment(
       p.utr,
       p.amount,
@@ -97,6 +109,7 @@ export async function backendSubmitWithdrawal(
 ): Promise<void> {
   try {
     const backend = await getBackend();
+    await ensureUserRole();
     await backend.submitWithdrawalRequest(
       w.amount,
       "INR",
@@ -114,6 +127,7 @@ export async function backendSubmitKyc(
 ): Promise<void> {
   try {
     const backend = await getBackend();
+    await ensureUserRole();
     const docType =
       data.docType === "pan" ? KycDocumentType.pan : KycDocumentType.aadhaar;
     await backend.submitKyc(
@@ -133,6 +147,7 @@ export async function backendSubmitTicket(
 ): Promise<void> {
   try {
     const backend = await getBackend();
+    await ensureUserRole();
     await backend.submitSupportTicket(t.subject, t.message, BigInt(Date.now()));
   } catch (e) {
     console.warn("backendSubmitTicket failed:", e);
@@ -292,5 +307,76 @@ export async function backendRejectKyc(
     await backend.updateKycStatus(principal, KycStatus.rejected, reason);
   } catch (e) {
     console.warn("backendRejectKyc failed:", e);
+  }
+}
+
+export interface AdminUser {
+  principalStr: string;
+  name: string;
+  referralCode: string;
+}
+
+export interface AdminKyc {
+  principalStr: string;
+  documentType: string;
+  documentNumber: string;
+  status: "pending" | "approved" | "rejected";
+  submittedAt: bigint;
+  blobId: string;
+  rejectionReason: string;
+}
+
+interface _UserProfileWithPrincipal {
+  principal: Principal;
+  name: string;
+  referralCode: string;
+}
+
+export async function backendGetAllUsers(): Promise<AdminUser[]> {
+  try {
+    const backend = await getBackend();
+    const result: _UserProfileWithPrincipal[] = await (
+      backend as any
+    ).getAllUserProfiles();
+    return result.map((u) => ({
+      principalStr: (u.principal as Principal).toText(),
+      name: u.name,
+      referralCode: u.referralCode,
+    }));
+  } catch (e) {
+    console.warn("backendGetAllUsers failed:", e);
+    return [];
+  }
+}
+
+interface _KycSubmission {
+  owner: Principal;
+  documentType: unknown;
+  documentNumber: string;
+  status: unknown;
+  submittedAtTimestamp: bigint;
+  blobId: string;
+  rejectionReason: string;
+}
+
+export async function backendGetAllKyc(): Promise<AdminKyc[]> {
+  try {
+    const backend = await getBackend();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result: _KycSubmission[] = await (
+      backend as any
+    ).getAllKycSubmissions();
+    return result.map((k) => ({
+      principalStr: (k.owner as Principal).toText(),
+      documentType: String(k.documentType),
+      documentNumber: k.documentNumber,
+      status: mapStatusVariant(k.status as unknown as string),
+      submittedAt: k.submittedAtTimestamp,
+      blobId: k.blobId,
+      rejectionReason: k.rejectionReason,
+    }));
+  } catch (e) {
+    console.warn("backendGetAllKyc failed:", e);
+    return [];
   }
 }

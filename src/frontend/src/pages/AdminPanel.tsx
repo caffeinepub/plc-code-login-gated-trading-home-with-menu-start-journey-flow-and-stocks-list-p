@@ -17,12 +17,16 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
+  type AdminKyc,
   type AdminPayment,
   type AdminTicket,
+  type AdminUser,
   type AdminWithdrawal,
   backendApprovePayment as backendApprovePaymentFn,
+  backendGetAllKyc,
   backendGetAllPayments,
   backendGetAllTickets,
+  backendGetAllUsers,
   backendGetAllWithdrawals,
   backendRejectPayment as backendRejectPaymentFn,
   backendUpdateWithdrawal as backendUpdateWithdrawalFn,
@@ -234,13 +238,22 @@ function EmptyState({
 
 // ─── Dashboard Tab ────────────────────────────────────────────────────────────
 function DashboardTab({ refreshKey }: { refreshKey: number }) {
-  const _ = refreshKey; // suppress unused warning
   const [maintenance, setMaintenanceState] = useState(isMaintenanceMode());
+  const [backendUserCount, setBackendUserCount] = useState(0);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey is intentional re-fetch trigger
+  useEffect(() => {
+    backendGetAllUsers()
+      .then((bu) => setBackendUserCount(bu.length))
+      .catch(() => {});
+  }, [refreshKey]);
+
   const users = getAllUsers();
   const payments = getAllPaymentsAdmin();
   const withdrawals = getAllWithdrawalsAdmin();
   const pendingPayments = payments.filter((p) => p.status === "pending").length;
   const totalBalance = users.reduce((s, u) => s + (u.balance || 0), 0);
+  const totalUserCount = Math.max(users.length, backendUserCount);
 
   const recentActivity = [
     ...payments.slice(-5).map((p) => ({ ...p, type: "payment" as const })),
@@ -254,7 +267,7 @@ function DashboardTab({ refreshKey }: { refreshKey: number }) {
   const stats = [
     {
       label: "Total Users",
-      value: users.length,
+      value: totalUserCount,
       icon: Users,
       color: "oklch(0.78 0.18 82)",
     },
@@ -959,35 +972,34 @@ function UsersTab({
   refreshKey: number;
   onRefresh: () => void;
 }) {
-  const _ = refreshKey;
-  const [backendPayments, setBackendPayments] = useState<AdminPayment[]>([]);
+  const [backendUsers, setBackendUsers] = useState<AdminUser[]>([]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey is intentional re-fetch trigger
   useEffect(() => {
-    backendGetAllPayments()
-      .then(setBackendPayments)
+    backendGetAllUsers()
+      .then(setBackendUsers)
       .catch(() => {});
   }, [refreshKey]);
 
   const localUsers = getAllUsers();
-  // Add synthetic users for backend principals not already in localStorage
+  // Merge: local users first, then backend users not already represented locally
   const localUniqueIds = new Set(localUsers.map((u) => u.uniqueId));
-  const backendOnlyPrincipals = new Set<string>();
-  for (const bp of backendPayments) {
-    if (!localUniqueIds.has(bp.principalStr.slice(0, 8))) {
-      backendOnlyPrincipals.add(bp.principalStr);
-    }
-  }
-  const syntheticUsers: FscUser[] = Array.from(backendOnlyPrincipals).map(
-    (p) =>
-      ({
-        name: "Cross-Device User",
-        phone: p.slice(0, 10),
-        uniqueId: p.slice(0, 8),
-        balance: 0,
-        _isSynthetic: true,
-      }) as FscUser & { _isSynthetic: boolean },
-  );
+  const localPhones = new Set(localUsers.map((u) => u.phone));
+  const syntheticUsers: FscUser[] = backendUsers
+    .filter(
+      (bu) =>
+        !localUniqueIds.has(bu.principalStr.slice(0, 8)) &&
+        !localPhones.has(bu.principalStr.slice(0, 10)),
+    )
+    .map(
+      (bu) =>
+        ({
+          name: bu.name,
+          phone: bu.principalStr.slice(0, 10),
+          uniqueId: bu.principalStr.slice(0, 8),
+          balance: 0,
+        }) as FscUser,
+    );
   const users = [...localUsers, ...syntheticUsers];
   const [editBalanceId, setEditBalanceId] = useState<string | null>(null);
   const [balanceInput, setBalanceInput] = useState("");
@@ -1457,8 +1469,39 @@ function KycTab({
   refreshKey: number;
   onRefresh: () => void;
 }) {
-  const _ = refreshKey;
-  const kycList = getAllKycAdmin().sort((a, b) =>
+  const [backendKyc, setBackendKyc] = useState<AdminKyc[]>([]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey is intentional re-fetch trigger
+  useEffect(() => {
+    backendGetAllKyc()
+      .then(setBackendKyc)
+      .catch(() => {});
+  }, [refreshKey]);
+
+  const localKyc = getAllKycAdmin();
+  const localPrincipalSet = new Set(localKyc.map((k) => k.userId));
+  type KycEntry = KycData & {
+    userId: string;
+    userName: string;
+    userPhone: string;
+  };
+  const backendAsLocal: KycEntry[] = backendKyc
+    .filter((k) => !localPrincipalSet.has(k.principalStr))
+    .map((k) => ({
+      userId: k.principalStr,
+      userName: `${k.principalStr.slice(0, 12)}...`,
+      userPhone: k.principalStr.slice(0, 10),
+      docType:
+        k.documentType === "pan" ? ("pan" as const) : ("aadhaar" as const),
+      docNumber: k.documentNumber,
+      status: k.status === "approved" ? ("verified" as const) : k.status,
+      submittedDate: new Date(
+        Number(k.submittedAt) / 1_000_000,
+      ).toLocaleDateString("en-IN"),
+      docImage: k.blobId || undefined,
+    }));
+
+  const kycList = [...localKyc, ...backendAsLocal].sort((a, b) =>
     a.submittedDate < b.submittedDate ? 1 : -1,
   );
 

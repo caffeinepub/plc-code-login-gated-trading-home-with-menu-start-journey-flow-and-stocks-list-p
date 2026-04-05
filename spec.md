@@ -1,35 +1,37 @@
-# FSC Foreign Smart Coins - Blue Ocean Redesign
+# FSC Foreign Smart Coins
 
 ## Current State
-The app uses a deep navy + gold theme throughout. All major screens (splash, login, home, menu, profile) use gold accent colors (oklch ~82 hue) on a dark navy background (oklch ~265 hue). The profile section in AppMenu has display issues: the avatar fallback text color/contrast, badge positioning, and name/initials visibility have problems when no profile picture is set.
+New users who register on the app do not appear in the Admin Panel, and their submitted data (payments, KYC, withdrawals, support tickets) also does not show up. The root cause is a two-part failure:
+
+1. **Role registration never happens**: When a new user registers, the frontend calls `backendRegisterUser` which calls `saveCallerUserProfile`. However, the backend requires the caller to first have a `#user` role assigned via `_initializeAccessControlWithSecret`. Since this step is never called, the backend traps with "User is not registered" and all backend calls silently fail (caught in try/catch). So no user data ever reaches the shared canister.
+
+2. **Admin Panel Users tab only reads localStorage**: `getAllUsers()` scans only the current device's localStorage. Users on other devices never appear. There is no backend endpoint to fetch all user profiles for the admin.
+
+3. **KYC tab also only reads localStorage**: `getAllKycAdmin()` scans only localStorage, so KYC submissions from other devices never appear in the admin panel.
 
 ## Requested Changes (Diff)
 
 ### Add
-- Blue ocean color palette: rich deep ocean blue (#0a1628 / oklch 0.08 0.04 240), electric blue accents (oklch 0.65 0.22 220), cyan highlights (oklch 0.72 0.18 195), smooth gradient transitions between blues and teals
-- Premium splash screen with 6s duration, blue ocean waves/particles, animated logo glow in blue/cyan
-- Login page: full HD redesign with ocean gradient background, cyan-blue accent card, frosted glass effect
-- Profile display fix: ensure name is always visible with proper contrast, badge shows clearly, avatar fallback initials use high-contrast colors
+- Backend endpoint `getAllUserProfiles()` — admin-only, returns all registered user profiles with their principal
+- Backend endpoint `getAllKycSubmissions()` — admin-only, returns all KYC submissions with owner principal
+- `backendGetAllUsers()` function in `backendStore.ts`
+- `backendGetAllKyc()` function in `backendStore.ts`
 
 ### Modify
-- `index.css`: Replace all gold/amber CSS tokens with blue ocean palette. Primary: electric blue. Accent: cyan. Background: deep ocean navy.
-- `SplashScreen.tsx`: Full redesign to blue ocean theme - deep blue background, floating blue/teal particles, logo with blue glow, cyan progress bar, 6s timer
-- `LoginScreen.tsx`: Full HD redesign - ocean gradient bg, glass card with blue border, blue input focus states, cyan CTA button
-- `AppMenu.tsx`: Fix profile section - ensure avatar fallback has visible initials, name text contrast fixed, tier badge clearly visible, all menu icons/text updated to blue theme
-- `BottomNav.tsx`: Update active indicator to blue/cyan instead of gold
-- `Home.tsx`: Update balance card, quick actions, header to blue ocean palette
-- `Profile.tsx`: Fix avatar display, ensure initials/image shows clearly
+- `backendRegisterUser()` in `backendStore.ts`: call `_initializeAccessControlWithSecret("")` BEFORE calling `saveCallerUserProfile` so the user gets a `#user` role and all subsequent backend calls succeed
+- Also call `_initializeAccessControlWithSecret("")` before `backendSubmitPayment`, `backendSubmitWithdrawal`, `backendSubmitKyc`, `backendSubmitTicket` as a safety measure for existing users who may not have initialized
+- `AdminPanel.tsx` Users tab: fetch users from backend (merged with localStorage), display backend users with their name, phone (from localStorage match or profile name), and data
+- `AdminPanel.tsx` KYC tab: fetch KYC from backend (merged with localStorage)
+- `AdminPanel.tsx` Dashboard tab: include backend user count in total user stats
 
 ### Remove
-- Gold (#78 hue) primary color system replaced with blue/cyan
-- Amber gradient accents replaced with ocean blue gradients
+- Nothing removed
 
 ## Implementation Plan
-1. Update `index.css` CSS variables to blue ocean palette (primary: 220-240 hue range, accent: 195 cyan)
-2. Rewrite `SplashScreen.tsx` with blue ocean premium design, 6s timer, floating blue particles
-3. Rewrite `LoginScreen.tsx` with full HD ocean blue design
-4. Fix `AppMenu.tsx` profile section display issues + apply blue theme
-5. Update `BottomNav.tsx` active states to blue
-6. Update `Home.tsx` balance card and UI elements to blue theme
-7. Fix `Profile.tsx` avatar display
-8. Validate and deploy
+1. Add `getAllUserProfiles` and `getAllKycSubmissions` to `src/backend/main.mo`
+2. Regenerate backend bindings (backend.d.ts will be updated automatically)
+3. Update `backendRegisterUser` and all other backend write functions in `backendStore.ts` to call `_initializeAccessControlWithSecret` first
+4. Add `backendGetAllUsers` and `backendGetAllKyc` to `backendStore.ts`
+5. Update `AdminPanel.tsx` Users tab to load from backend and merge with localStorage
+6. Update `AdminPanel.tsx` KYC tab to load from backend and merge with localStorage
+7. Update Dashboard tab stats to count backend users

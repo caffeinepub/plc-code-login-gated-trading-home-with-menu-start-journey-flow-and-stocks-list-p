@@ -883,5 +883,46 @@ actor {
     userStocksList.add(planToBuy[0]);
     userStocks.add(caller, userStocksList);
   };
+
+  // ─── Admin: Get All User Profiles ────────────────────────────────────────────
+
+  public type UserProfileWithPrincipal = {
+    principal : Principal;
+    name : Text;
+    referralCode : Text;
+    portfolio : [PortfolioEntry];
+    referred : [Principal];
+  };
+
+  public query ({ caller }) func getAllUserProfiles() : async [UserProfileWithPrincipal] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view all user profiles");
+    };
+    let result = List.empty<UserProfileWithPrincipal>();
+    for ((principal, profile) in userProfiles.entries()) {
+      result.add({
+        principal;
+        name = profile.name;
+        referralCode = profile.referralCode;
+        portfolio = profile.portfolio;
+        referred = profile.referred;
+      });
+    };
+    result.toArray();
+  };
+
+  // ─── Admin: Get All KYC Submissions ──────────────────────────────────────────
+
+  public query ({ caller }) func getAllKycSubmissions() : async [KycSubmission] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view all KYC submissions");
+    };
+    let result = List.empty<KycSubmission>();
+    for (kyc in kycSubmissions.values()) {
+      result.add(kyc);
+    };
+    result.toArray();
+  };
+
 };
 

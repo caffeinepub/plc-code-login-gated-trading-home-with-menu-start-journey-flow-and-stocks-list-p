@@ -22,6 +22,14 @@ export interface UserProfile {
     referred: Array<Principal>;
     name: string;
 }
+export interface UserProfileWithPrincipal {
+    principal: Principal;
+    portfolio: Array<PortfolioEntry>;
+    referralCode: string;
+    referred: Array<Principal>;
+    name: string;
+}
+
 export interface TicketReply {
     sender: Principal;
     message: string;
@@ -75,6 +83,18 @@ export enum KycStatus {
     pending = "pending",
     rejected = "rejected"
 }
+export interface KycSubmission {
+    owner: Principal;
+    documentType: KycDocumentType;
+    documentNumber: string;
+    status: KycStatus;
+    submittedAtTimestamp: bigint;
+    verifiedAtTimestamp: bigint | null;
+    blobId: string;
+    comments: string;
+    rejectionReason: string;
+}
+
 export enum TicketStatus {
     closed = "closed",
     open = "open"
@@ -91,6 +111,7 @@ export enum VipTier {
     silver = "silver"
 }
 export interface backendInterface {
+    _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     buyStock(planId: bigint): Promise<void>;
     closeTicket(ticketId: bigint): Promise<void>;
@@ -126,4 +147,6 @@ export interface backendInterface {
     updatePaymentStatus(user: Principal, utr: string, newStatus: PaymentStatus): Promise<void>;
     updatePortfolio(coin: string, amount: number): Promise<void>;
     updateWithdrawalStatus(user: Principal, timestamp: bigint, newStatus: WithdrawalStatus): Promise<void>;
+    getAllKycSubmissions(): Promise<Array<KycSubmission>>;
+    getAllUserProfiles(): Promise<Array<UserProfileWithPrincipal>>;
 }
