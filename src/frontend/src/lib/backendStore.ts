@@ -82,7 +82,7 @@ export async function backendRegisterUser(user: FscUser): Promise<void> {
       }
       const backend = await getBackend();
       // Use phone-keyed public registration (no role required - works with anonymous identity)
-      await (backend as any).registerUserByPhone(
+      await backend.registerUserByPhone(
         user.phone,
         user.name,
         user.uniqueId,
@@ -360,7 +360,7 @@ export interface RegisteredUserBackend {
 export async function backendGetAllUsers(): Promise<AdminUser[]> {
   try {
     const backend = await getBackend();
-    const result = (await (backend as any).getAllRegisteredUsers()) as Array<{
+    const result = (await backend.getAllRegisteredUsers()) as Array<{
       phone: string;
       name: string;
       uniqueId: string;
@@ -389,7 +389,7 @@ export async function backendSetUserFrozen(
 ): Promise<void> {
   try {
     const backend = await getBackend();
-    await (backend as any).setUserFrozenByPhone(phone, frozen);
+    await backend.setUserFrozenByPhone(phone, frozen);
   } catch (e) {
     console.warn("backendSetUserFrozen failed:", e);
   }
@@ -398,7 +398,7 @@ export async function backendSetUserFrozen(
 export async function backendIsUserFrozen(phone: string): Promise<boolean> {
   try {
     const backend = await getBackend();
-    return (await (backend as any).isUserFrozenByPhone(phone)) as boolean;
+    return (await backend.isUserFrozenByPhone(phone)) as boolean;
   } catch (_e) {
     return false;
   }
@@ -407,7 +407,7 @@ export async function backendIsUserFrozen(phone: string): Promise<boolean> {
 export async function backendSetMaintenanceMode(on: boolean): Promise<void> {
   try {
     const backend = await getBackend();
-    await (backend as any).setMaintenanceMode(on);
+    await backend.setMaintenanceMode(on);
   } catch (e) {
     console.warn("backendSetMaintenanceMode failed:", e);
   }
@@ -416,7 +416,7 @@ export async function backendSetMaintenanceMode(on: boolean): Promise<void> {
 export async function backendGetMaintenanceMode(): Promise<boolean> {
   try {
     const backend = await getBackend();
-    return (await (backend as any).getMaintenanceMode()) as boolean;
+    return (await backend.getMaintenanceMode()) as boolean;
   } catch (_e) {
     return false;
   }
@@ -428,7 +428,7 @@ export async function backendUpdateUserBalance(
 ): Promise<void> {
   try {
     const backend = await getBackend();
-    await (backend as any).updateRegisteredUserBalance(phone, balance);
+    await backend.updateRegisteredUserBalance(phone, balance);
   } catch (e) {
     console.warn("backendUpdateUserBalance failed:", e);
   }

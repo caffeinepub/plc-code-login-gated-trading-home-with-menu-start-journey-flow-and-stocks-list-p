@@ -24,6 +24,26 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
+export const KycStatus = IDL.Variant({
+  'verified' : IDL.Null,
+  'pending' : IDL.Null,
+  'rejected' : IDL.Null,
+});
+export const KycDocumentType = IDL.Variant({
+  'pan' : IDL.Null,
+  'aadhaar' : IDL.Null,
+});
+export const KycSubmission = IDL.Record({
+  'status' : KycStatus,
+  'documentType' : KycDocumentType,
+  'verifiedAtTimestamp' : IDL.Opt(IDL.Nat),
+  'owner' : IDL.Principal,
+  'rejectionReason' : IDL.Text,
+  'blobId' : IDL.Text,
+  'comments' : IDL.Text,
+  'submittedAtTimestamp' : IDL.Nat,
+  'documentNumber' : IDL.Text,
+});
 export const PaymentStatus = IDL.Variant({
   'verified' : IDL.Null,
   'pending' : IDL.Null,
@@ -36,6 +56,14 @@ export const PaymentSubmission = IDL.Record({
   'screenshotBlobId' : IDL.Text,
   'timestamp' : IDL.Nat,
   'amount' : IDL.Float64,
+});
+export const RegisteredUser = IDL.Record({
+  'balance' : IDL.Float64,
+  'name' : IDL.Text,
+  'uniqueId' : IDL.Text,
+  'frozen' : IDL.Bool,
+  'phone' : IDL.Text,
+  'registeredAt' : IDL.Nat,
 });
 export const TicketStatus = IDL.Variant({
   'closed' : IDL.Null,
@@ -55,6 +83,17 @@ export const SupportTicket = IDL.Record({
   'timestamp' : IDL.Nat,
   'replies' : IDL.Vec(TicketReply),
 });
+export const PortfolioEntry = IDL.Record({
+  'coin' : IDL.Text,
+  'amount' : IDL.Float64,
+});
+export const UserProfileWithPrincipal = IDL.Record({
+  'portfolio' : IDL.Vec(PortfolioEntry),
+  'principal' : IDL.Principal,
+  'referralCode' : IDL.Text,
+  'referred' : IDL.Vec(IDL.Principal),
+  'name' : IDL.Text,
+});
 export const WithdrawalStatus = IDL.Variant({
   'verified' : IDL.Null,
   'pending' : IDL.Null,
@@ -67,20 +106,11 @@ export const WithdrawalRequest = IDL.Record({
   'timestamp' : IDL.Nat,
   'amount' : IDL.Float64,
 });
-export const PortfolioEntry = IDL.Record({
-  'coin' : IDL.Text,
-  'amount' : IDL.Float64,
-});
 export const UserProfile = IDL.Record({
   'portfolio' : IDL.Vec(PortfolioEntry),
   'referralCode' : IDL.Text,
   'referred' : IDL.Vec(IDL.Principal),
   'name' : IDL.Text,
-});
-export const KycStatus = IDL.Variant({
-  'verified' : IDL.Null,
-  'pending' : IDL.Null,
-  'rejected' : IDL.Null,
 });
 export const LoginActivity = IDL.Record({
   'deviceDetails' : IDL.Text,
@@ -98,10 +128,6 @@ export const VipTier = IDL.Variant({
 export const VipTierInfo = IDL.Record({
   'tier' : VipTier,
   'totalVerifiedDeposits' : IDL.Float64,
-});
-export const KycDocumentType = IDL.Variant({
-  'pan' : IDL.Null,
-  'aadhaar' : IDL.Null,
 });
 export const AchievementType = IDL.Variant({
   'five_referrals' : IDL.Null,
@@ -156,12 +182,19 @@ export const idlService = IDL.Service({
       [],
     ),
   'deletePriceAlert' : IDL.Func([IDL.Nat], [], []),
+  'getAllKycSubmissions' : IDL.Func([], [IDL.Vec(KycSubmission)], ['query']),
   'getAllPayments' : IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(PaymentSubmission)))],
       ['query'],
     ),
+  'getAllRegisteredUsers' : IDL.Func([], [IDL.Vec(RegisteredUser)], ['query']),
   'getAllTickets' : IDL.Func([], [IDL.Vec(SupportTicket)], ['query']),
+  'getAllUserProfiles' : IDL.Func(
+      [],
+      [IDL.Vec(UserProfileWithPrincipal)],
+      ['query'],
+    ),
   'getAllWithdrawals' : IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(WithdrawalRequest)))],
@@ -172,6 +205,12 @@ export const idlService = IDL.Service({
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getKycStatus' : IDL.Func([], [KycStatus], ['query']),
   'getLastLogins' : IDL.Func([], [IDL.Vec(LoginActivity)], ['query']),
+  'getMaintenanceMode' : IDL.Func([], [IDL.Bool], ['query']),
+  'getRegisteredUserByPhone' : IDL.Func(
+      [IDL.Text],
+      [IDL.Opt(RegisteredUser)],
+      ['query'],
+    ),
   'getUserBalance' : IDL.Func([], [IDL.Float64], ['query']),
   'getUserPayments' : IDL.Func([], [IDL.Vec(PaymentSubmission)], ['query']),
   'getUserProfile' : IDL.Func(
@@ -183,14 +222,22 @@ export const idlService = IDL.Service({
   'getUserWithdrawals' : IDL.Func([], [IDL.Vec(WithdrawalRequest)], ['query']),
   'getVipTier' : IDL.Func([], [VipTierInfo], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'isUserFrozenByPhone' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
   'recordLoginActivity' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text, IDL.Nat],
       [],
       [],
     ),
   'registerReferral' : IDL.Func([IDL.Text], [], []),
+  'registerUserByPhone' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Text, IDL.Nat],
+      [],
+      [],
+    ),
   'replyToTicket' : IDL.Func([IDL.Nat, IDL.Text, IDL.Nat], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'setMaintenanceMode' : IDL.Func([IDL.Bool], [], []),
+  'setUserFrozenByPhone' : IDL.Func([IDL.Text, IDL.Bool], [], []),
   'submitKyc' : IDL.Func(
       [KycDocumentType, IDL.Text, IDL.Text, IDL.Text, IDL.Nat],
       [],
@@ -219,6 +266,7 @@ export const idlService = IDL.Service({
       [],
     ),
   'updatePortfolio' : IDL.Func([IDL.Text, IDL.Float64], [], []),
+  'updateRegisteredUserBalance' : IDL.Func([IDL.Text, IDL.Float64], [], []),
   'updateWithdrawalStatus' : IDL.Func(
       [IDL.Principal, IDL.Nat, WithdrawalStatus],
       [],
@@ -245,6 +293,26 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
+  const KycStatus = IDL.Variant({
+    'verified' : IDL.Null,
+    'pending' : IDL.Null,
+    'rejected' : IDL.Null,
+  });
+  const KycDocumentType = IDL.Variant({
+    'pan' : IDL.Null,
+    'aadhaar' : IDL.Null,
+  });
+  const KycSubmission = IDL.Record({
+    'status' : KycStatus,
+    'documentType' : KycDocumentType,
+    'verifiedAtTimestamp' : IDL.Opt(IDL.Nat),
+    'owner' : IDL.Principal,
+    'rejectionReason' : IDL.Text,
+    'blobId' : IDL.Text,
+    'comments' : IDL.Text,
+    'submittedAtTimestamp' : IDL.Nat,
+    'documentNumber' : IDL.Text,
+  });
   const PaymentStatus = IDL.Variant({
     'verified' : IDL.Null,
     'pending' : IDL.Null,
@@ -257,6 +325,14 @@ export const idlFactory = ({ IDL }) => {
     'screenshotBlobId' : IDL.Text,
     'timestamp' : IDL.Nat,
     'amount' : IDL.Float64,
+  });
+  const RegisteredUser = IDL.Record({
+    'balance' : IDL.Float64,
+    'name' : IDL.Text,
+    'uniqueId' : IDL.Text,
+    'frozen' : IDL.Bool,
+    'phone' : IDL.Text,
+    'registeredAt' : IDL.Nat,
   });
   const TicketStatus = IDL.Variant({ 'closed' : IDL.Null, 'open' : IDL.Null });
   const TicketReply = IDL.Record({
@@ -273,6 +349,17 @@ export const idlFactory = ({ IDL }) => {
     'timestamp' : IDL.Nat,
     'replies' : IDL.Vec(TicketReply),
   });
+  const PortfolioEntry = IDL.Record({
+    'coin' : IDL.Text,
+    'amount' : IDL.Float64,
+  });
+  const UserProfileWithPrincipal = IDL.Record({
+    'portfolio' : IDL.Vec(PortfolioEntry),
+    'principal' : IDL.Principal,
+    'referralCode' : IDL.Text,
+    'referred' : IDL.Vec(IDL.Principal),
+    'name' : IDL.Text,
+  });
   const WithdrawalStatus = IDL.Variant({
     'verified' : IDL.Null,
     'pending' : IDL.Null,
@@ -285,20 +372,11 @@ export const idlFactory = ({ IDL }) => {
     'timestamp' : IDL.Nat,
     'amount' : IDL.Float64,
   });
-  const PortfolioEntry = IDL.Record({
-    'coin' : IDL.Text,
-    'amount' : IDL.Float64,
-  });
   const UserProfile = IDL.Record({
     'portfolio' : IDL.Vec(PortfolioEntry),
     'referralCode' : IDL.Text,
     'referred' : IDL.Vec(IDL.Principal),
     'name' : IDL.Text,
-  });
-  const KycStatus = IDL.Variant({
-    'verified' : IDL.Null,
-    'pending' : IDL.Null,
-    'rejected' : IDL.Null,
   });
   const LoginActivity = IDL.Record({
     'deviceDetails' : IDL.Text,
@@ -316,10 +394,6 @@ export const idlFactory = ({ IDL }) => {
   const VipTierInfo = IDL.Record({
     'tier' : VipTier,
     'totalVerifiedDeposits' : IDL.Float64,
-  });
-  const KycDocumentType = IDL.Variant({
-    'pan' : IDL.Null,
-    'aadhaar' : IDL.Null,
   });
   const AchievementType = IDL.Variant({
     'five_referrals' : IDL.Null,
@@ -374,12 +448,23 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'deletePriceAlert' : IDL.Func([IDL.Nat], [], []),
+    'getAllKycSubmissions' : IDL.Func([], [IDL.Vec(KycSubmission)], ['query']),
     'getAllPayments' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(PaymentSubmission)))],
         ['query'],
       ),
+    'getAllRegisteredUsers' : IDL.Func(
+        [],
+        [IDL.Vec(RegisteredUser)],
+        ['query'],
+      ),
     'getAllTickets' : IDL.Func([], [IDL.Vec(SupportTicket)], ['query']),
+    'getAllUserProfiles' : IDL.Func(
+        [],
+        [IDL.Vec(UserProfileWithPrincipal)],
+        ['query'],
+      ),
     'getAllWithdrawals' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(WithdrawalRequest)))],
@@ -390,6 +475,12 @@ export const idlFactory = ({ IDL }) => {
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getKycStatus' : IDL.Func([], [KycStatus], ['query']),
     'getLastLogins' : IDL.Func([], [IDL.Vec(LoginActivity)], ['query']),
+    'getMaintenanceMode' : IDL.Func([], [IDL.Bool], ['query']),
+    'getRegisteredUserByPhone' : IDL.Func(
+        [IDL.Text],
+        [IDL.Opt(RegisteredUser)],
+        ['query'],
+      ),
     'getUserBalance' : IDL.Func([], [IDL.Float64], ['query']),
     'getUserPayments' : IDL.Func([], [IDL.Vec(PaymentSubmission)], ['query']),
     'getUserProfile' : IDL.Func(
@@ -405,14 +496,22 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getVipTier' : IDL.Func([], [VipTierInfo], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'isUserFrozenByPhone' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
     'recordLoginActivity' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text, IDL.Nat],
         [],
         [],
       ),
     'registerReferral' : IDL.Func([IDL.Text], [], []),
+    'registerUserByPhone' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Text, IDL.Nat],
+        [],
+        [],
+      ),
     'replyToTicket' : IDL.Func([IDL.Nat, IDL.Text, IDL.Nat], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'setMaintenanceMode' : IDL.Func([IDL.Bool], [], []),
+    'setUserFrozenByPhone' : IDL.Func([IDL.Text, IDL.Bool], [], []),
     'submitKyc' : IDL.Func(
         [KycDocumentType, IDL.Text, IDL.Text, IDL.Text, IDL.Nat],
         [],
@@ -441,6 +540,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'updatePortfolio' : IDL.Func([IDL.Text, IDL.Float64], [], []),
+    'updateRegisteredUserBalance' : IDL.Func([IDL.Text, IDL.Float64], [], []),
     'updateWithdrawalStatus' : IDL.Func(
         [IDL.Principal, IDL.Nat, WithdrawalStatus],
         [],

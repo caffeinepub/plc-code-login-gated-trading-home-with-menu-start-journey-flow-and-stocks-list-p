@@ -22,18 +22,28 @@ export interface UserProfile {
     referred: Array<Principal>;
     name: string;
 }
-export interface UserProfileWithPrincipal {
-    principal: Principal;
-    portfolio: Array<PortfolioEntry>;
-    referralCode: string;
-    referred: Array<Principal>;
-    name: string;
-}
-
 export interface TicketReply {
     sender: Principal;
     message: string;
     timestamp: bigint;
+}
+export interface KycSubmission {
+    status: KycStatus;
+    documentType: KycDocumentType;
+    verifiedAtTimestamp?: bigint;
+    owner: Principal;
+    rejectionReason: string;
+    blobId: string;
+    comments: string;
+    submittedAtTimestamp: bigint;
+    documentNumber: string;
+}
+export interface UserProfileWithPrincipal {
+    portfolio: Array<PortfolioEntry>;
+    principal: Principal;
+    referralCode: string;
+    referred: Array<Principal>;
+    name: string;
 }
 export interface LoginActivity {
     deviceDetails: string;
@@ -53,6 +63,14 @@ export interface PaymentSubmission {
     screenshotBlobId: string;
     timestamp: bigint;
     amount: number;
+}
+export interface RegisteredUser {
+    balance: number;
+    name: string;
+    uniqueId: string;
+    frozen: boolean;
+    phone: string;
+    registeredAt: bigint;
 }
 export interface WithdrawalRequest {
     status: WithdrawalStatus;
@@ -83,18 +101,6 @@ export enum KycStatus {
     pending = "pending",
     rejected = "rejected"
 }
-export interface KycSubmission {
-    owner: Principal;
-    documentType: KycDocumentType;
-    documentNumber: string;
-    status: KycStatus;
-    submittedAtTimestamp: bigint;
-    verifiedAtTimestamp: bigint | null;
-    blobId: string;
-    comments: string;
-    rejectionReason: string;
-}
-
 export enum TicketStatus {
     closed = "closed",
     open = "open"
@@ -111,7 +117,6 @@ export enum VipTier {
     silver = "silver"
 }
 export interface backendInterface {
-    _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     buyStock(planId: bigint): Promise<void>;
     closeTicket(ticketId: bigint): Promise<void>;
@@ -119,14 +124,19 @@ export interface backendInterface {
     createReferralCode(referralCode: string): Promise<void>;
     createStockPlan(name: string, price: number, commission: number, returns: number, currency: string, timestamp: bigint): Promise<bigint>;
     deletePriceAlert(alertId: bigint): Promise<void>;
+    getAllKycSubmissions(): Promise<Array<KycSubmission>>;
     getAllPayments(): Promise<Array<[Principal, Array<PaymentSubmission>]>>;
+    getAllRegisteredUsers(): Promise<Array<RegisteredUser>>;
     getAllTickets(): Promise<Array<SupportTicket>>;
+    getAllUserProfiles(): Promise<Array<UserProfileWithPrincipal>>;
     getAllWithdrawals(): Promise<Array<[Principal, Array<WithdrawalRequest>]>>;
     getBalance(user: Principal): Promise<number>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getKycStatus(): Promise<KycStatus>;
     getLastLogins(): Promise<Array<LoginActivity>>;
+    getMaintenanceMode(): Promise<boolean>;
+    getRegisteredUserByPhone(phone: string): Promise<RegisteredUser | null>;
     getUserBalance(): Promise<number>;
     getUserPayments(): Promise<Array<PaymentSubmission>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
@@ -134,10 +144,14 @@ export interface backendInterface {
     getUserWithdrawals(): Promise<Array<WithdrawalRequest>>;
     getVipTier(): Promise<VipTierInfo>;
     isCallerAdmin(): Promise<boolean>;
+    isUserFrozenByPhone(phone: string): Promise<boolean>;
     recordLoginActivity(ip: string, provider: string, deviceDetails: string, timestamp: bigint): Promise<void>;
     registerReferral(referrerCode: string): Promise<void>;
+    registerUserByPhone(phone: string, name: string, uniqueId: string, timestamp: bigint): Promise<void>;
     replyToTicket(ticketId: bigint, message: string, timestamp: bigint): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    setMaintenanceMode(on: boolean): Promise<void>;
+    setUserFrozenByPhone(phone: string, frozen: boolean): Promise<void>;
     submitKyc(documentType: KycDocumentType, documentNumber: string, blobId: string, comments: string, timestamp: bigint): Promise<void>;
     submitPayment(utr: string, amount: number, paymentMethod: string, screenshotBlobId: string, timestamp: bigint): Promise<void>;
     submitSupportTicket(subject: string, message: string, timestamp: bigint): Promise<bigint>;
@@ -146,7 +160,6 @@ export interface backendInterface {
     updateKycStatus(user: Principal, newStatus: KycStatus, rejectionReason: string): Promise<void>;
     updatePaymentStatus(user: Principal, utr: string, newStatus: PaymentStatus): Promise<void>;
     updatePortfolio(coin: string, amount: number): Promise<void>;
+    updateRegisteredUserBalance(phone: string, newBalance: number): Promise<void>;
     updateWithdrawalStatus(user: Principal, timestamp: bigint, newStatus: WithdrawalStatus): Promise<void>;
-    getAllKycSubmissions(): Promise<Array<KycSubmission>>;
-    getAllUserProfiles(): Promise<Array<UserProfileWithPrincipal>>;
 }

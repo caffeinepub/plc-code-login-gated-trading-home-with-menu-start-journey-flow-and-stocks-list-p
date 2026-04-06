@@ -22,6 +22,17 @@ export type KycDocumentType = { 'pan' : null } |
 export type KycStatus = { 'verified' : null } |
   { 'pending' : null } |
   { 'rejected' : null };
+export interface KycSubmission {
+  'status' : KycStatus,
+  'documentType' : KycDocumentType,
+  'verifiedAtTimestamp' : [] | [bigint],
+  'owner' : Principal,
+  'rejectionReason' : string,
+  'blobId' : string,
+  'comments' : string,
+  'submittedAtTimestamp' : bigint,
+  'documentNumber' : string,
+}
 export interface LoginActivity {
   'deviceDetails' : string,
   'provider' : string,
@@ -41,6 +52,14 @@ export interface PaymentSubmission {
   'amount' : number,
 }
 export interface PortfolioEntry { 'coin' : string, 'amount' : number }
+export interface RegisteredUser {
+  'balance' : number,
+  'name' : string,
+  'uniqueId' : string,
+  'frozen' : boolean,
+  'phone' : string,
+  'registeredAt' : bigint,
+}
 export interface SupportTicket {
   'status' : TicketStatus,
   'subject' : string,
@@ -59,6 +78,13 @@ export type TicketStatus = { 'closed' : null } |
   { 'open' : null };
 export interface UserProfile {
   'portfolio' : Array<PortfolioEntry>,
+  'referralCode' : string,
+  'referred' : Array<Principal>,
+  'name' : string,
+}
+export interface UserProfileWithPrincipal {
+  'portfolio' : Array<PortfolioEntry>,
+  'principal' : Principal,
   'referralCode' : string,
   'referred' : Array<Principal>,
   'name' : string,
@@ -122,11 +148,14 @@ export interface _SERVICE {
     bigint
   >,
   'deletePriceAlert' : ActorMethod<[bigint], undefined>,
+  'getAllKycSubmissions' : ActorMethod<[], Array<KycSubmission>>,
   'getAllPayments' : ActorMethod<
     [],
     Array<[Principal, Array<PaymentSubmission>]>
   >,
+  'getAllRegisteredUsers' : ActorMethod<[], Array<RegisteredUser>>,
   'getAllTickets' : ActorMethod<[], Array<SupportTicket>>,
+  'getAllUserProfiles' : ActorMethod<[], Array<UserProfileWithPrincipal>>,
   'getAllWithdrawals' : ActorMethod<
     [],
     Array<[Principal, Array<WithdrawalRequest>]>
@@ -136,6 +165,8 @@ export interface _SERVICE {
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getKycStatus' : ActorMethod<[], KycStatus>,
   'getLastLogins' : ActorMethod<[], Array<LoginActivity>>,
+  'getMaintenanceMode' : ActorMethod<[], boolean>,
+  'getRegisteredUserByPhone' : ActorMethod<[string], [] | [RegisteredUser]>,
   'getUserBalance' : ActorMethod<[], number>,
   'getUserPayments' : ActorMethod<[], Array<PaymentSubmission>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
@@ -143,13 +174,20 @@ export interface _SERVICE {
   'getUserWithdrawals' : ActorMethod<[], Array<WithdrawalRequest>>,
   'getVipTier' : ActorMethod<[], VipTierInfo>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'isUserFrozenByPhone' : ActorMethod<[string], boolean>,
   'recordLoginActivity' : ActorMethod<
     [string, string, string, bigint],
     undefined
   >,
   'registerReferral' : ActorMethod<[string], undefined>,
+  'registerUserByPhone' : ActorMethod<
+    [string, string, string, bigint],
+    undefined
+  >,
   'replyToTicket' : ActorMethod<[bigint, string, bigint], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'setMaintenanceMode' : ActorMethod<[boolean], undefined>,
+  'setUserFrozenByPhone' : ActorMethod<[string, boolean], undefined>,
   'submitKyc' : ActorMethod<
     [KycDocumentType, string, string, string, bigint],
     undefined
@@ -170,6 +208,7 @@ export interface _SERVICE {
     undefined
   >,
   'updatePortfolio' : ActorMethod<[string, number], undefined>,
+  'updateRegisteredUserBalance' : ActorMethod<[string, number], undefined>,
   'updateWithdrawalStatus' : ActorMethod<
     [Principal, bigint, WithdrawalStatus],
     undefined
