@@ -29,10 +29,13 @@ import {
   TrendingUp,
   Trophy,
   Users,
+  Volume2,
+  VolumeX,
   Wallet,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useSound } from "../context/SoundContext";
 import {
   type FscUser,
   getCurrentUser,
@@ -124,6 +127,7 @@ export default function AppMenu({
   const [isDark, setIsDark] = useState(true);
   const [_unreadDms, setUnreadDms] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { isMuted, toggleMute } = useSound();
 
   useEffect(() => {
     if (isOpen) {
@@ -597,6 +601,66 @@ export default function AppMenu({
                     : "oklch(0.55 0.18 215)",
                   left: isDark ? "calc(100% - 18px)" : "2px",
                   boxShadow: isDark
+                    ? "0 0 6px oklch(0.65 0.22 220 / 0.6)"
+                    : "none",
+                }}
+              />
+            </div>
+          </button>
+
+          {/* Sound Toggle Button */}
+          <button
+            type="button"
+            onClick={toggleMute}
+            className="w-full flex items-center justify-between rounded-xl px-3 py-3 mb-2 transition-all"
+            style={{
+              background: "oklch(0.12 0.045 238)",
+              border: "1px solid oklch(0.22 0.06 232)",
+            }}
+            data-ocid="menu.sound.toggle"
+          >
+            <span
+              className="text-sm font-medium flex items-center gap-2.5"
+              style={{ color: "oklch(0.85 0.02 215)" }}
+            >
+              {isMuted ? (
+                <VolumeX
+                  style={{
+                    width: 16,
+                    height: 16,
+                    color: "oklch(0.55 0.12 25)",
+                  }}
+                />
+              ) : (
+                <Volume2
+                  style={{
+                    width: 16,
+                    height: 16,
+                    color: "oklch(0.72 0.18 195)",
+                  }}
+                />
+              )}
+              {isMuted ? "Sound Off" : "Sound On"}
+            </span>
+            <div
+              className="w-10 h-5 rounded-full relative transition-all"
+              style={{
+                background: !isMuted
+                  ? "linear-gradient(90deg, oklch(0.62 0.22 220 / 0.5), oklch(0.55 0.22 230 / 0.35))"
+                  : "oklch(0.20 0.03 240 / 0.5)",
+                border: !isMuted
+                  ? "1px solid oklch(0.62 0.22 220 / 0.4)"
+                  : "1px solid oklch(0.30 0.04 240 / 0.4)",
+              }}
+            >
+              <div
+                className="absolute top-0.5 w-4 h-4 rounded-full transition-all"
+                style={{
+                  background: !isMuted
+                    ? "linear-gradient(135deg, oklch(0.82 0.18 210), oklch(0.65 0.22 228))"
+                    : "oklch(0.40 0.04 240)",
+                  left: !isMuted ? "calc(100% - 18px)" : "2px",
+                  boxShadow: !isMuted
                     ? "0 0 6px oklch(0.65 0.22 220 / 0.6)"
                     : "none",
                 }}

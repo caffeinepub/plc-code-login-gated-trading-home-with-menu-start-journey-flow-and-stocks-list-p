@@ -11,6 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useMarketTicker } from "../hooks/useMarketTicker";
+import { playSound } from "../hooks/useSounds";
 import {
   type ActivePlan,
   type FscUser,
@@ -181,6 +182,7 @@ export default function Stocks({
       toast.success(
         `${confirmPlan.name} purchased! ₹${bonus.toFixed(2)} bonus credited.`,
       );
+      playSound("purchase");
       onPurchaseSuccess();
     }, 900);
   }

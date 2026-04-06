@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, Lock, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { playSound } from "../hooks/useSounds";
 import { backendSubmitWithdrawal } from "../lib/backendStore";
 import {
   type FscUser,
@@ -108,6 +109,7 @@ export default function Withdrawal({ onBack }: WithdrawalProps) {
     withdrawals.push(req);
     saveWithdrawals(withdrawals);
     backendSubmitWithdrawal(req).catch(() => {});
+    playSound("withdrawal");
     setSubmittedAmount(amt);
     setTimeout(() => {
       setSaving(false);

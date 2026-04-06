@@ -1,5 +1,12 @@
 import { Input } from "@/components/ui/input";
-import { ArrowRight, Mail, Shield, Smartphone, User } from "lucide-react";
+import {
+  ArrowRight,
+  Loader2,
+  Mail,
+  Shield,
+  Smartphone,
+  User,
+} from "lucide-react";
 import { useState } from "react";
 import { backendRegisterUser } from "../lib/backendStore";
 import {
@@ -33,6 +40,7 @@ export default function LoginScreen({
   const [phone, setPhone] = useState("");
   const [nameError, setNameError] = useState("");
   const [phoneError, setPhoneError] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   function handleNameNext() {
     const trimmed = name.trim();
@@ -44,7 +52,7 @@ export default function LoginScreen({
     setStep(2);
   }
 
-  function handleLogin() {
+  async function handleLogin() {
     const cleaned = phone.replace(/\s/g, "");
     if (!/^[6-9]\d{9}$/.test(cleaned)) {
       setPhoneError("Please enter a valid 10-digit Indian mobile number");
@@ -73,8 +81,10 @@ export default function LoginScreen({
         }
         saveUser(existing);
         registerUserGlobally(cleaned);
-        // Always re-sync returning users to backend in case previous sync failed
-        backendRegisterUser(existing).catch(() => {});
+        setIsLoggingIn(true);
+        // Await backend sync with retries to ensure admin panel visibility
+        await backendRegisterUser(existing).catch(() => {});
+        setIsLoggingIn(false);
         onLogin();
         return;
       } catch {
@@ -91,10 +101,12 @@ export default function LoginScreen({
     };
     saveUser(user);
     registerUserGlobally(cleaned);
-    // Attempt backend sync - fire and forget but log errors
-    backendRegisterUser(user).catch((e) =>
+    setIsLoggingIn(true);
+    // Await backend registration to ensure user is visible in admin panel
+    await backendRegisterUser(user).catch((e) =>
       console.warn("Backend sync failed:", e),
     );
+    setIsLoggingIn(false);
     onLogin();
   }
 
@@ -430,11 +442,28 @@ export default function LoginScreen({
               <button
                 type="button"
                 onClick={handleLogin}
+                disabled={isLoggingIn}
                 className="btn-gold w-full mt-4 rounded-2xl py-4 font-bold uppercase tracking-widest flex items-center justify-center gap-2"
-                style={{ fontSize: "0.9rem" }}
+                style={{
+                  fontSize: "0.9rem",
+                  opacity: isLoggingIn ? 0.7 : 1,
+                  cursor: isLoggingIn ? "not-allowed" : "pointer",
+                }}
                 data-ocid="login.submit_button"
               >
-                Login <ArrowRight style={{ width: 18, height: 18 }} />
+                {isLoggingIn ? (
+                  <>
+                    <Loader2
+                      style={{ width: 18, height: 18 }}
+                      className="animate-spin"
+                    />
+                    Signing In...
+                  </>
+                ) : (
+                  <>
+                    Login <ArrowRight style={{ width: 18, height: 18 }} />
+                  </>
+                )}
               </button>
               <button
                 type="button"

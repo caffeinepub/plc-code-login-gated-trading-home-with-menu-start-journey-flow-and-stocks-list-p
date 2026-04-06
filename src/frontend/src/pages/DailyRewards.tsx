@@ -1,6 +1,7 @@
 import { ArrowLeft, Gift } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { playSound, startSpin, stopSpin } from "../hooks/useSounds";
 import {
   formatInr,
   getCurrentUser,
@@ -140,6 +141,7 @@ export default function DailyRewards({ onBack }: DailyRewardsProps) {
     const targetRotation = fullSpins + targetSegmentAngle;
 
     setIsSpinning(true);
+    startSpin();
 
     const startTime = performance.now();
     const duration = 3500;
@@ -158,6 +160,8 @@ export default function DailyRewards({ onBack }: DailyRewardsProps) {
       if (t < 1) {
         requestAnimationFrame(animate);
       } else {
+        stopSpin();
+        playSound("win");
         setIsSpinning(false);
         const newTotal = totalEarned + reward;
         setTotalEarned(newTotal);

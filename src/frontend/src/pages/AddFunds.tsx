@@ -4,6 +4,7 @@ import { ArrowLeft, CheckCircle, Copy, Upload } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useMarketTicker } from "../hooks/useMarketTicker";
+import { playSound } from "../hooks/useSounds";
 import { backendSubmitPayment } from "../lib/backendStore";
 import {
   type PaymentSubmission,
@@ -162,6 +163,7 @@ export default function AddFunds({ initialAmount, onBack }: AddFundsProps) {
     savePayments(payments);
     // Fire-and-forget backend sync
     backendSubmitPayment(submission).catch(() => {});
+    playSound("deposit");
     setTimeout(() => {
       setIsSubmitting(false);
       setDone(true);

@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import AppMenu from "../components/AppMenu";
 import NetworkSpeed from "../components/NetworkSpeed";
 import TradingChart from "../components/TradingChart";
+import { playSound } from "../hooks/useSounds";
 import {
   type Broadcast,
   type FscUser,
@@ -45,13 +46,23 @@ function getGreeting() {
 function useCountUp(target: number, duration = 1400) {
   const [value, setValue] = useState(0);
   const raf = useRef<number>(0);
+  const lastTickTime = useRef<number>(0);
+  const lastTickValue = useRef<number>(0);
   useEffect(() => {
     const start = performance.now();
     function step(now: number) {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - 2 ** (-10 * progress);
-      setValue(target * eased);
+      const newValue = target * eased;
+      setValue(newValue);
+      const diff = Math.abs(newValue - lastTickValue.current);
+      const timeSinceTick = now - lastTickTime.current;
+      if (diff > 10 && timeSinceTick > 100) {
+        playSound("balance_tick");
+        lastTickTime.current = now;
+        lastTickValue.current = newValue;
+      }
       if (progress < 1) raf.current = requestAnimationFrame(step);
     }
     raf.current = requestAnimationFrame(step);
@@ -254,6 +265,7 @@ export default function Home({
   function handleDismissBroadcast(broadcastId: string) {
     const user = getCurrentUser();
     if (!user) return;
+    playSound("dismiss");
     markBroadcastRead(broadcastId, user.uniqueId);
     setBroadcasts((prev) => prev.filter((b) => b.id !== broadcastId));
   }
@@ -520,7 +532,10 @@ export default function Home({
               <button
                 key={action.id}
                 type="button"
-                onClick={() => onNavigate(action.id)}
+                onClick={() => {
+                  playSound("tap");
+                  onNavigate(action.id);
+                }}
                 className="quick-action"
                 data-ocid={`home.${action.id}.button`}
               >

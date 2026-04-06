@@ -1,4 +1,5 @@
 import { BarChart2, Briefcase, Grid3X3, Home } from "lucide-react";
+import { playSound } from "../hooks/useSounds";
 
 interface BottomNavProps {
   currentPage: string;
@@ -29,9 +30,14 @@ export default function BottomNav({
           <button
             key={item.id}
             type="button"
-            onClick={() =>
-              item.id === "menu" ? onMenuOpen() : onNavigate(item.id)
-            }
+            onClick={() => {
+              playSound("tap");
+              if (item.id === "menu") {
+                onMenuOpen();
+              } else {
+                onNavigate(item.id);
+              }
+            }}
             className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl transition-all duration-200 relative"
             style={{
               color: isActive ? "oklch(0.72 0.20 210)" : "oklch(0.45 0.05 230)",

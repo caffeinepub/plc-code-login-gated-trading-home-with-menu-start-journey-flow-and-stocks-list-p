@@ -17,7 +17,7 @@ import {
   Wallet,
   XCircle,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   type AdminKyc,
   type AdminPayment,
@@ -982,13 +982,26 @@ function UsersTab({
   onRefresh: () => void;
 }) {
   const [backendUsers, setBackendUsers] = useState<AdminUser[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersFetchError, setUsersFetchError] = useState(false);
+
+  const fetchBackendUsers = useCallback(async () => {
+    setUsersLoading(true);
+    setUsersFetchError(false);
+    try {
+      const result = await backendGetAllUsers();
+      setBackendUsers(result);
+    } catch {
+      setUsersFetchError(true);
+    } finally {
+      setUsersLoading(false);
+    }
+  }, []);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey is intentional re-fetch trigger
   useEffect(() => {
-    backendGetAllUsers()
-      .then(setBackendUsers)
-      .catch(() => {});
-  }, [refreshKey]);
+    fetchBackendUsers();
+  }, [refreshKey, fetchBackendUsers]);
 
   // Build merged user list: backend is the source of truth (cross-device)
   // Also include any localStorage-only users not yet synced to backend
@@ -1054,6 +1067,72 @@ function UsersTab({
     onRefresh();
     setEditUpiId(null);
   }
+
+  if (usersLoading && backendUsers.length === 0)
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 12,
+          padding: "40px 20px",
+        }}
+      >
+        <div
+          style={{
+            width: 32,
+            height: 32,
+            border: "3px solid oklch(0.65 0.22 220)",
+            borderTopColor: "transparent",
+            borderRadius: "50%",
+            animation: "spin 0.8s linear infinite",
+          }}
+        />
+        <p style={{ color: "oklch(0.6 0.06 220)", fontSize: "0.9rem" }}>
+          Loading users from network...
+        </p>
+      </div>
+    );
+
+  if (usersFetchError && users.length === 0)
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 12,
+          padding: "40px 20px",
+        }}
+      >
+        <p
+          style={{
+            color: "oklch(0.65 0.22 22)",
+            fontSize: "0.9rem",
+            textAlign: "center",
+          }}
+        >
+          Failed to load users from network. Check your connection.
+        </p>
+        <button
+          type="button"
+          onClick={fetchBackendUsers}
+          style={{
+            padding: "8px 20px",
+            background: "oklch(0.65 0.22 220)",
+            color: "white",
+            border: "none",
+            borderRadius: 10,
+            cursor: "pointer",
+            fontSize: "0.85rem",
+            fontWeight: 600,
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    );
 
   if (users.length === 0)
     return <EmptyState icon={Users} message="No registered users yet" />;

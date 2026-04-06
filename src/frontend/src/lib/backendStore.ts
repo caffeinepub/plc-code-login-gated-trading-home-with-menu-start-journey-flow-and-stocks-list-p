@@ -71,19 +71,31 @@ export async function ensureUserRole(): Promise<void> {
 }
 
 export async function backendRegisterUser(user: FscUser): Promise<void> {
-  try {
-    const backend = await getBackend();
-    // Use phone-keyed public registration (no role required - works with anonymous identity)
-    await (backend as any).registerUserByPhone(
-      user.phone,
-      user.name,
-      user.uniqueId,
-      BigInt(Date.now()),
-    );
-  } catch (e) {
-    console.warn("backendRegisterUser failed:", e);
-    throw e; // re-throw so caller can handle
+  // Retry up to 4 times with exponential backoff to handle transient canister connection issues
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      if (attempt > 0) {
+        // Invalidate cached backend on retry in case connection was stale
+        backendCache = null;
+        await new Promise((res) => setTimeout(res, 400 * attempt));
+      }
+      const backend = await getBackend();
+      // Use phone-keyed public registration (no role required - works with anonymous identity)
+      await (backend as any).registerUserByPhone(
+        user.phone,
+        user.name,
+        user.uniqueId,
+        BigInt(Date.now()),
+      );
+      return; // success
+    } catch (e) {
+      lastError = e;
+      console.warn(`backendRegisterUser attempt ${attempt + 1} failed:`, e);
+    }
   }
+  // All retries exhausted - throw so caller knows sync failed
+  throw lastError;
 }
 
 export async function backendSubmitPayment(
