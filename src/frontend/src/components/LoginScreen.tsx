@@ -73,6 +73,8 @@ export default function LoginScreen({
         }
         saveUser(existing);
         registerUserGlobally(cleaned);
+        // Always re-sync returning users to backend in case previous sync failed
+        backendRegisterUser(existing).catch(() => {});
         onLogin();
         return;
       } catch {
@@ -89,7 +91,10 @@ export default function LoginScreen({
     };
     saveUser(user);
     registerUserGlobally(cleaned);
-    backendRegisterUser(user).catch(() => {});
+    // Attempt backend sync - fire and forget but log errors
+    backendRegisterUser(user).catch((e) =>
+      console.warn("Backend sync failed:", e),
+    );
     onLogin();
   }
 

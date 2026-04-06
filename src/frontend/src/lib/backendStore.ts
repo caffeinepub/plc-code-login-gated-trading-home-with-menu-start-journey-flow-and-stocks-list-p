@@ -73,16 +73,16 @@ export async function ensureUserRole(): Promise<void> {
 export async function backendRegisterUser(user: FscUser): Promise<void> {
   try {
     const backend = await getBackend();
-    // Must initialize role first so backend calls don't trap
-    await ensureUserRole();
-    await backend.saveCallerUserProfile({
-      name: user.name,
-      referralCode: `FSC${user.uniqueId}`,
-      referred: [],
-      portfolio: [],
-    });
+    // Use phone-keyed public registration (no role required - works with anonymous identity)
+    await (backend as any).registerUserByPhone(
+      user.phone,
+      user.name,
+      user.uniqueId,
+      BigInt(Date.now()),
+    );
   } catch (e) {
     console.warn("backendRegisterUser failed:", e);
+    throw e; // re-throw so caller can handle
   }
 }
 
@@ -311,9 +311,13 @@ export async function backendRejectKyc(
 }
 
 export interface AdminUser {
-  principalStr: string;
+  principalStr: string; // contains phone for phone-keyed users
   name: string;
-  referralCode: string;
+  referralCode: string; // contains uniqueId for phone-keyed users
+  phone?: string;
+  uniqueId?: string;
+  balance?: number;
+  frozen?: boolean;
 }
 
 export interface AdminKyc {
@@ -332,20 +336,89 @@ interface _UserProfileWithPrincipal {
   referralCode: string;
 }
 
+export interface RegisteredUserBackend {
+  phone: string;
+  name: string;
+  uniqueId: string;
+  balance: number;
+  frozen: boolean;
+  registeredAt: bigint;
+}
+
 export async function backendGetAllUsers(): Promise<AdminUser[]> {
   try {
     const backend = await getBackend();
-    const result: _UserProfileWithPrincipal[] = await (
-      backend as any
-    ).getAllUserProfiles();
+    const result = (await (backend as any).getAllRegisteredUsers()) as Array<{
+      phone: string;
+      name: string;
+      uniqueId: string;
+      balance: number;
+      frozen: boolean;
+      registeredAt: bigint;
+    }>;
     return result.map((u) => ({
-      principalStr: (u.principal as Principal).toText(),
+      principalStr: u.phone, // repurposed field - stores phone for display
       name: u.name,
-      referralCode: u.referralCode,
+      referralCode: u.uniqueId,
+      phone: u.phone,
+      uniqueId: u.uniqueId,
+      balance: Number(u.balance),
+      frozen: u.frozen,
     }));
   } catch (e) {
     console.warn("backendGetAllUsers failed:", e);
     return [];
+  }
+}
+
+export async function backendSetUserFrozen(
+  phone: string,
+  frozen: boolean,
+): Promise<void> {
+  try {
+    const backend = await getBackend();
+    await (backend as any).setUserFrozenByPhone(phone, frozen);
+  } catch (e) {
+    console.warn("backendSetUserFrozen failed:", e);
+  }
+}
+
+export async function backendIsUserFrozen(phone: string): Promise<boolean> {
+  try {
+    const backend = await getBackend();
+    return (await (backend as any).isUserFrozenByPhone(phone)) as boolean;
+  } catch (_e) {
+    return false;
+  }
+}
+
+export async function backendSetMaintenanceMode(on: boolean): Promise<void> {
+  try {
+    const backend = await getBackend();
+    await (backend as any).setMaintenanceMode(on);
+  } catch (e) {
+    console.warn("backendSetMaintenanceMode failed:", e);
+  }
+}
+
+export async function backendGetMaintenanceMode(): Promise<boolean> {
+  try {
+    const backend = await getBackend();
+    return (await (backend as any).getMaintenanceMode()) as boolean;
+  } catch (_e) {
+    return false;
+  }
+}
+
+export async function backendUpdateUserBalance(
+  phone: string,
+  balance: number,
+): Promise<void> {
+  try {
+    const backend = await getBackend();
+    await (backend as any).updateRegisteredUserBalance(phone, balance);
+  } catch (e) {
+    console.warn("backendUpdateUserBalance failed:", e);
   }
 }
 

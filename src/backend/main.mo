@@ -190,6 +190,19 @@ actor {
   let userStocks = Map.empty<Principal, List.List<StockPlan>>();
   let referralStats = Map.empty<Principal, ReferralStats>();
 
+  // ─── Phone-keyed public user registry (no role required) ─────────────────────
+  public type RegisteredUser = {
+    name : Text;
+    phone : Text;
+    uniqueId : Text;
+    balance : Float;
+    frozen : Bool;
+    registeredAt : Nat;
+  };
+
+  let registeredUsers = Map.empty<Text, RegisteredUser>();
+  var maintenanceModeOn : Bool = false;
+
   var nextTicketId = 0;
   var nextAlertId = 0;
   var nextPlanId = 0;
@@ -922,6 +935,92 @@ actor {
       result.add(kyc);
     };
     result.toArray();
+  };
+
+  // ─── Public: Phone-keyed User Registry (no role required) ────────────────────
+
+  // Any caller can register a user by phone number (idempotent - won't overwrite existing)
+  public shared func registerUserByPhone(phone : Text, name : Text, uniqueId : Text, timestamp : Nat) : async () {
+    switch (registeredUsers.get(phone)) {
+      case (?_existing) {
+        // Already registered - do nothing (idempotent)
+      };
+      case (null) {
+        registeredUsers.add(phone, {
+          name;
+          phone;
+          uniqueId;
+          balance = 0.0;
+          frozen = false;
+          registeredAt = timestamp;
+        });
+      };
+    };
+  };
+
+  // Get a single registered user by phone
+  public query func getRegisteredUserByPhone(phone : Text) : async ?RegisteredUser {
+    registeredUsers.get(phone);
+  };
+
+  // Admin: get all registered users (no role check - uses admin PIN from frontend)
+  public query func getAllRegisteredUsers() : async [RegisteredUser] {
+    let result = List.empty<RegisteredUser>();
+    for (u in registeredUsers.values()) {
+      result.add(u);
+    };
+    result.toArray();
+  };
+
+  // Admin: update user balance by phone
+  public shared func updateRegisteredUserBalance(phone : Text, newBalance : Float) : async () {
+    switch (registeredUsers.get(phone)) {
+      case (?u) {
+        registeredUsers.add(phone, {
+          name = u.name;
+          phone = u.phone;
+          uniqueId = u.uniqueId;
+          balance = newBalance;
+          frozen = u.frozen;
+          registeredAt = u.registeredAt;
+        });
+      };
+      case (null) {};
+    };
+  };
+
+  // Admin: freeze or unfreeze a user by phone
+  public shared func setUserFrozenByPhone(phone : Text, frozen : Bool) : async () {
+    switch (registeredUsers.get(phone)) {
+      case (?u) {
+        registeredUsers.add(phone, {
+          name = u.name;
+          phone = u.phone;
+          uniqueId = u.uniqueId;
+          balance = u.balance;
+          frozen;
+          registeredAt = u.registeredAt;
+        });
+      };
+      case (null) {};
+    };
+  };
+
+  // Public: check if a user is frozen by phone
+  public query func isUserFrozenByPhone(phone : Text) : async Bool {
+    switch (registeredUsers.get(phone)) {
+      case (?u) { u.frozen };
+      case (null) { false };
+    };
+  };
+
+  // Admin: maintenance mode
+  public shared func setMaintenanceMode(on : Bool) : async () {
+    maintenanceModeOn := on;
+  };
+
+  public query func getMaintenanceMode() : async Bool {
+    maintenanceModeOn;
   };
 
 };

@@ -5,6 +5,10 @@ import BottomNav from "./components/BottomNav";
 import LoginScreen from "./components/LoginScreen";
 import SplashScreen from "./components/SplashScreen";
 import { SharedDataProvider } from "./context/SharedDataContext";
+import {
+  backendGetMaintenanceMode,
+  backendIsUserFrozen,
+} from "./lib/backendStore";
 import Achievements from "./pages/Achievements";
 import AddFunds from "./pages/AddFunds";
 import AdminPanel from "./pages/AdminPanel";
@@ -78,16 +82,33 @@ export default function App() {
     document.documentElement.classList.add(theme);
   }, []);
 
-  // Poll freeze status every 10 seconds while in app
+  // Poll freeze status every 10 seconds while in app (checks both local and backend)
   useEffect(() => {
     if (phase !== "app") return;
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
       const user = getCurrentUser();
       if (user) {
-        setIsFrozen(isUserFrozen(user.phone));
+        const localFrozen = isUserFrozen(user.phone);
+        setIsFrozen(localFrozen);
+        // Also check backend for cross-device freeze enforcement
+        backendIsUserFrozen(user.phone)
+          .then((backendFrozen) => {
+            if (backendFrozen && !localFrozen) {
+              setIsFrozen(true);
+            }
+          })
+          .catch(() => {});
       }
-      setIsMaintenance(isMaintenanceMode());
-    }, 3000);
+      const localMaintenance = isMaintenanceMode();
+      setIsMaintenance(localMaintenance);
+      if (!localMaintenance) {
+        backendGetMaintenanceMode()
+          .then((backendMaintenance) => {
+            if (backendMaintenance) setIsMaintenance(true);
+          })
+          .catch(() => {});
+      }
+    }, 5000);
     return () => clearInterval(interval);
   }, [phase]);
 

@@ -31,6 +31,8 @@ import {
   backendGetAllUsers,
   backendGetAllWithdrawals,
   backendRejectPayment as backendRejectPaymentFn,
+  backendSetUserFrozen,
+  backendUpdateUserBalance,
   backendUpdateWithdrawal as backendUpdateWithdrawalFn,
 } from "../lib/backendStore";
 import {
@@ -988,26 +990,36 @@ function UsersTab({
       .catch(() => {});
   }, [refreshKey]);
 
+  // Build merged user list: backend is the source of truth (cross-device)
+  // Also include any localStorage-only users not yet synced to backend
   const localUsers = getAllUsers();
-  // Merge: local users first, then backend users not already represented locally
-  const localUniqueIds = new Set(localUsers.map((u) => u.uniqueId));
-  const localPhones = new Set(localUsers.map((u) => u.phone));
-  const syntheticUsers: FscUser[] = backendUsers
-    .filter(
-      (bu) =>
-        !localUniqueIds.has(bu.principalStr.slice(0, 8)) &&
-        !localPhones.has(bu.principalStr.slice(0, 10)),
-    )
-    .map(
-      (bu) =>
-        ({
-          name: bu.name,
-          phone: bu.principalStr.slice(0, 10),
-          uniqueId: bu.principalStr.slice(0, 8),
-          balance: 0,
-        }) as FscUser,
-    );
-  const users = [...localUsers, ...syntheticUsers];
+  const backendPhones = new Set(
+    backendUsers.map((bu) => bu.phone ?? bu.principalStr),
+  );
+
+  // Convert backend users to FscUser shape
+  const usersFromBackend: FscUser[] = backendUsers.map((bu) => {
+    const phone = bu.phone ?? bu.principalStr;
+    const uniqueId = bu.uniqueId ?? bu.referralCode ?? "";
+    // Merge balance from localStorage if available (admin adjustments)
+    const localUser = localUsers.find((lu) => lu.phone === phone);
+    return {
+      name: bu.name,
+      phone,
+      uniqueId,
+      balance: localUser?.balance ?? bu.balance ?? 0,
+      upiId: localUser?.upiId,
+      upiName: localUser?.upiName,
+      suspended: bu.frozen ?? localUser?.suspended ?? false,
+    } as FscUser;
+  });
+
+  // Add localStorage-only users not yet in backend (will sync on next login)
+  const localOnlyUsers = localUsers.filter(
+    (lu) => !backendPhones.has(lu.phone),
+  );
+
+  const users = [...usersFromBackend, ...localOnlyUsers];
   const [editBalanceId, setEditBalanceId] = useState<string | null>(null);
   const [balanceInput, setBalanceInput] = useState("");
   const [editUpiId, setEditUpiId] = useState<string | null>(null);
@@ -1024,6 +1036,7 @@ function UsersTab({
     const num = Number.parseFloat(balanceInput);
     if (!Number.isNaN(num) && num >= 0) {
       adminAdjustBalance(phone, num);
+      backendUpdateUserBalance(phone, num).catch(() => {});
       onRefresh();
     }
     setEditBalanceId(null);
@@ -1299,6 +1312,7 @@ function UsersTab({
                   }}
                   onClick={() => {
                     adminUnsuspendUser(u.phone);
+                    backendSetUserFrozen(u.phone, false).catch(() => {});
                     onRefresh();
                   }}
                   data-ocid={`admin.users.toggle.${i + 1}`}
@@ -1325,6 +1339,7 @@ function UsersTab({
                   }}
                   onClick={() => {
                     adminSuspendUser(u.phone, "Frozen by admin");
+                    backendSetUserFrozen(u.phone, true).catch(() => {});
                     onRefresh();
                   }}
                   data-ocid={`admin.users.toggle.${i + 1}`}
